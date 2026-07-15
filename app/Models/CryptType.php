@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CryptType extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'code',
         'name',
@@ -21,4 +19,9 @@ class CryptType extends Model
         'default_capacity' => 'integer',
         'max_capacity' => 'integer',
     ];
+
+    public function crypts(): HasMany
+    {
+        return $this->hasMany(Crypt::class);
+    }
 }

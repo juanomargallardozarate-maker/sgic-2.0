@@ -4,83 +4,40 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\TenantController;
+use App\Http\Controllers\Inventory\CryptController;
 
 /*
 |--------------------------------------------------------------------------
 | RUTAS PÚBLICAS
 |--------------------------------------------------------------------------
-|
-| Rutas accesibles sin autenticación.
-|
 */
-
-// Ruta raíz - Landing page
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Rutas de autenticación (Laravel Breeze)
 require __DIR__.'/auth.php';
 
 /*
 |--------------------------------------------------------------------------
 | RUTAS PROTEGIDAS (Requieren Autenticación)
 |--------------------------------------------------------------------------
-|
-| Todas las rutas dentro de este grupo requieren que el usuario
-| esté autenticado. El middleware 'auth' verifica la sesión activa.
-|
 */
-
 Route::middleware(['auth'])->group(function () {
     
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD (Detecta rol automáticamente)
-    |--------------------------------------------------------------------------
-    |
-    | El DashboardController decide qué vista mostrar según el rol:
-    | - super_admin → dashboard-superadmin (Panel SaaS)
-    | - admin_cemetery → dashboard (Panel del Cementerio)
-    | - admin → dashboard (Panel Administrativo)
-    | - operativo → dashboard (Panel Operativo)
-    | - consulta → dashboard (Panel de Solo Lectura)
-    |
-    */
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    // Dashboard (Detecta rol automáticamente)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    /*
-    |--------------------------------------------------------------------------
-    | PERFIL DE USUARIO (Breeze)
-    |--------------------------------------------------------------------------
-    |
-    | Rutas estándar de Laravel Breeze para gestión de perfil.
-    |
-    */
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    // Perfil de usuario (Breeze)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 /*
 |--------------------------------------------------------------------------
 | RUTAS SUPERADMIN (Gestión Multi-tenant)
 |--------------------------------------------------------------------------
-|
-| Rutas exclusivas para el rol 'super_admin'.
-| NO aplican el middleware 'tenant' porque el SuperAdmin
-| no pertenece a ningún tenant específico.
-|
-| Middleware aplicados:
-| - auth: Verifica autenticación
-| - role:super_admin: Verifica que sea SuperAdmin (Spatie)
-|
 */
-
 Route::middleware(['auth', 'role:super_admin'])
     ->prefix('super-admin')
     ->name('super-admin.')
@@ -90,71 +47,63 @@ Route::middleware(['auth', 'role:super_admin'])
         Route::resource('tenants', TenantController::class);
         
         // Acciones específicas sobre tenants
-        Route::post('tenants/{tenant}/suspend', [TenantController::class, 'suspend'])
-            ->name('tenants.suspend');
-        
-        Route::post('tenants/{tenant}/activate', [TenantController::class, 'activate'])
-            ->name('tenants.activate');
-        
-        Route::post('tenants/{tenant}/extend', [TenantController::class, 'extendSubscription'])
-            ->name('tenants.extend');
-        
-        Route::post('tenants/{tenant}/change-plan', [TenantController::class, 'changePlan'])
-            ->name('tenants.change-plan');
+        Route::post('tenants/{tenant}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
+        Route::post('tenants/{tenant}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
+        Route::post('tenants/{tenant}/extend', [TenantController::class, 'extendSubscription'])->name('tenants.extend');
+        Route::post('tenants/{tenant}/change-plan', [TenantController::class, 'changePlan'])->name('tenants.change-plan');
 
-
-        // 🔍 RUTA TEMPORAL DE DEBUG
+        // Ruta temporal de debug (eliminar en producción)
         Route::get('tenants/debug-logs', [TenantController::class, 'debugLogs'])->name('tenants.debug-logs');
-   
-
     });
 
 /*
 |--------------------------------------------------------------------------
 | RUTAS DEL TENANT (Cementerios Clientes)
 |--------------------------------------------------------------------------
-|
-| Rutas para usuarios que pertenecen a un tenant específico.
-| Aplican el middleware 'tenant' que:
-| 1. Identifica el tenant desde el subdominio
-| 2. Valida que el tenant esté activo
-| 3. Valida que la suscripción esté vigente
-| 4. Carga el tenant en la request y config
-|
-| NOTA: Estas rutas se habilitarán en el EPIC 2 (Inventario)
-| Por ahora están comentadas para evitar errores.
-|
+| NOTA: El middleware 'tenant' identifica el cementerio por subdominio.
+| El middleware 'role' ahora incluye 'super_admin' para permitir auditoría.
 */
+// ✅ DESPUÉS (Corregido)
+Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|consulta'])
+    ->group(function () {
+        
+	// EPIC 2: Inventario y Jerarquía
+	Route::prefix('inventory')->name('inventory.')->group(function () {
+    
+    	// ==========================================
+    	// 1. RUTAS ESTÁTICAS (SIN PARÁMETROS) - PRIMERO
+    	// ==========================================
+    	Route::get('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'index'])->name('crypts.index');
+    	Route::get('crypts/create', [\App\Http\Controllers\Inventory\CryptController::class, 'create'])->name('crypts.create');
+    	Route::post('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'store'])->name('crypts.store');
+    	Route::get('crypts/map', [\App\Http\Controllers\Inventory\CryptController::class, 'map'])->name('crypts.map');
+    
+    	// Rutas de Importación Masiva (DEBEN ir antes de crypts/{crypt})
+    	Route::get('crypts/import', [\App\Http\Controllers\Inventory\ImportController::class, 'index'])->name('crypts.import');
+    	Route::get('crypts/import-template', [\App\Http\Controllers\Inventory\ImportController::class, 'downloadTemplate'])->name('crypts.import-template');
+    	Route::post('crypts/import-process', [\App\Http\Controllers\Inventory\ImportController::class, 'import'])->name('crypts.import-process');
 
-// Route::middleware(['auth', 'tenant', 'role:admin_cemetery|admin|operativo|consulta'])
-//     ->group(function () {
-//         
-//         // EPIC 2: Inventario
-//         Route::prefix('inventory')->name('inventory.')->group(function () {
-//             Route::resource('sections', SectionController::class);
-//             Route::resource('blocks', BlockController::class);
-//             Route::resource('levels', LevelController::class);
-//             Route::resource('crypts', CryptController::class);
-//             Route::get('crypts/map', [CryptController::class, 'map'])->name('crypts.map');
-//         });
-//         
-//         // EPIC 3: Comercial
-//         Route::prefix('commercial')->name('commercial.')->group(function () {
-//             Route::resource('customers', CustomerController::class);
-//             Route::resource('contracts', ContractController::class);
-//             Route::resource('reservations', ReservationController::class);
-//         });
-//         
-//         // EPIC 4: Financiero
-//         Route::prefix('financial')->name('financial.')->group(function () {
-//             Route::resource('payments', PaymentController::class);
-//             Route::resource('invoices', InvoiceController::class);
-//             Route::get('debts', [DebtController::class, 'index'])->name('debts.index');
-//         });
-//         
-//         // EPIC 5: Operaciones
-//         Route::prefix('operations')->name('operations.')->group(function () {
-//             Route::resource('work-orders', WorkOrderController::class);
-//             Route::resource('crews', CrewController::class);
-//         });
-//     });
+    	// Rutas rápidas para crear jerarquía (AJAX)
+    	Route::post('hierarchy/sections', [\App\Http\Controllers\Inventory\CryptController::class, 'storeSection'])->name('hierarchy.sections.store');
+    	Route::post('hierarchy/blocks', [\App\Http\Controllers\Inventory\CryptController::class, 'storeBlock'])->name('hierarchy.blocks.store');
+    	Route::post('hierarchy/levels', [\App\Http\Controllers\Inventory\CryptController::class, 'storeLevel'])->name('hierarchy.levels.store');
+
+    	// ==========================================
+    	// 2. RUTAS CON PARÁMETROS - AL FINAL
+    	// ==========================================
+    	Route::get('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'show'])->name('crypts.show');
+    	Route::get('crypts/{crypt}/edit', [\App\Http\Controllers\Inventory\CryptController::class, 'edit'])->name('crypts.edit');
+    	Route::get('crypts/{crypt}/api', [\App\Http\Controllers\Inventory\CryptController::class, 'apiShow'])->name('crypts.api-show');
+    	Route::put('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'update'])->name('crypts.update');
+    	Route::delete('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'destroy'])->name('crypts.destroy');
+	});   
+        
+        // EPIC 3: Comercial (Comentado hasta que se implemente)
+        // Route::prefix('commercial')->name('commercial.')->group(function () { ... });
+        
+        // EPIC 4: Financiero (Comentado hasta que se implemente)
+        // Route::prefix('financial')->name('financial.')->group(function () { ... });
+        
+        // EPIC 5: Operaciones (Comentado hasta que se implemente)
+        // Route::prefix('operations')->name('operations.')->group(function () { ... });
+    });

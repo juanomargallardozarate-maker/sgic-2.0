@@ -1,7 +1,9 @@
-<aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-       class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col shadow-xl">
+<aside 
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
+    class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col shadow-xl"
+>
     
-    <!-- Logo Area -->
+    {{-- Logo Area --}}
     <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800 flex-shrink-0">
         <i class="fa-solid fa-church text-emerald-500 text-2xl mr-3"></i>
         <div>
@@ -18,7 +20,7 @@
         </div>
     </div>
 
-    <!-- User Info -->
+    {{-- User Info --}}
     <div class="p-4 border-b border-slate-800 bg-slate-900/50 flex-shrink-0">
         <div class="flex items-center">
             <div class="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-600 flex items-center justify-center text-white font-bold">
@@ -34,11 +36,13 @@
         </div>
     </div>
 
-    <!-- Navigation -->
+    {{-- Navigation --}}
     <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         
         @if(auth()->user()->hasRole('super_admin'))
-            {{-- Menú SuperAdmin --}}
+            {{-- ============================================ --}}
+            {{-- MENÚ SUPERADMIN --}}
+            {{-- ============================================ --}}
             <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Principal</div>
             
             <a href="{{ route('dashboard') }}" 
@@ -53,33 +57,44 @@
                 Gestión de Tenants
             </a>
             
-            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-file-invoice-dollar mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                Facturación SaaS
+            {{-- Enlaces Próximamente --}}
+            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                <i class="fa-solid fa-file-invoice-dollar mr-3 text-lg w-6 text-center"></i>
+                <span>Facturación SaaS</span>
+                <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
             </a>
             
-            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-users-gear mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                Soporte Técnico
+            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                <i class="fa-solid fa-users-gear mr-3 text-lg w-6 text-center"></i>
+                <span>Soporte Técnico</span>
+                <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
             </a>
 
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Sistema</div>
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-server mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                    Infraestructura
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-server mr-3 text-lg w-6 text-center"></i>
+                    <span>Infraestructura</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
                 </a>
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-shield-halved mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                    Auditoría Global
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-shield-halved mr-3 text-lg w-6 text-center"></i>
+                    <span>Auditoría Global</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
                 </a>
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-gear mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                    Configuración SaaS
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-gear mr-3 text-lg w-6 text-center"></i>
+                    <span>Configuración SaaS</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
                 </a>
             </div>
         @else
-            {{-- Menú Tenant --}}
+            {{-- ============================================ --}}
+            {{-- MENÚ TENANT (AdminCementerio, Administrativo, Operativo) --}}
+            {{-- ============================================ --}}
             <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Principal</div>
             
             <a href="{{ route('dashboard') }}" 
@@ -87,42 +102,98 @@
                 <i class="fa-solid fa-chart-line mr-3 text-lg w-6 text-center {{ request()->routeIs('dashboard') ? 'text-white' : 'group-hover:text-white' }}"></i>
                 Dashboard
             </a>
-            
-            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-map-location-dot mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                Inventario
-            </a>
-            
-            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-users mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                Clientes
-            </a>
-            
-            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-file-contract mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                Contratos
-            </a>
-            
-            <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-file-invoice-dollar mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                Finanzas
-            </a>
 
+            {{-- ============================================ --}}
+            {{-- SECCIÓN INVENTARIO (con submenús) --}}
+            {{-- ============================================ --}}
+            <div class="pt-4 mt-4 border-t border-slate-800">
+                <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Inventario</div>
+                
+                <a href="{{ route('inventory.crypts.index') }}" 
+                   class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('inventory.crypts.index') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                    <i class="fa-solid fa-layer-group mr-3 text-lg w-6 text-center {{ request()->routeIs('inventory.crypts.index') ? 'text-white' : 'group-hover:text-white' }}"></i>
+                    Criptas
+                </a>
+                
+                <a href="{{ route('inventory.crypts.map') }}" 
+                   class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('inventory.crypts.map') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                    <i class="fa-solid fa-map mr-3 text-lg w-6 text-center {{ request()->routeIs('inventory.crypts.map') ? 'text-white' : 'group-hover:text-white' }}"></i>
+                    Mapa Visual
+                </a>
+                
+                <a href="{{ route('inventory.crypts.import') }}" 
+                   class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('inventory.crypts.import') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                    <i class="fa-solid fa-file-csv mr-3 text-lg w-6 text-center {{ request()->routeIs('inventory.crypts.import') ? 'text-white' : 'group-hover:text-white' }}"></i>
+                    Importar Masivo
+                </a>
+            </div>
+
+            {{-- ============================================ --}}
+            {{-- SECCIÓN COMERCIAL (Próximamente) --}}
+            {{-- ============================================ --}}
+            <div class="pt-4 mt-4 border-t border-slate-800">
+                <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Comercial</div>
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-users mr-3 text-lg w-6 text-center"></i>
+                    <span>Clientes</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
+                </a>
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-file-contract mr-3 text-lg w-6 text-center"></i>
+                    <span>Contratos</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
+                </a>
+            </div>
+
+            {{-- ============================================ --}}
+            {{-- SECCIÓN FINANZAS (Próximamente) --}}
+            {{-- ============================================ --}}
+            <div class="pt-4 mt-4 border-t border-slate-800">
+                <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Finanzas</div>
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-file-invoice-dollar mr-3 text-lg w-6 text-center"></i>
+                    <span>Pagos</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
+                </a>
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-chart-pie mr-3 text-lg w-6 text-center"></i>
+                    <span>Reportes</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
+                </a>
+            </div>
+
+            {{-- ============================================ --}}
+            {{-- SECCIÓN CONFIGURACIÓN --}}
+            {{-- ============================================ --}}
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Configuración</div>
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-gear mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                    Ajustes
+                
+                <a href="{{ route('profile.edit') }}" 
+                   class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('profile.*') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                    <i class="fa-solid fa-user mr-3 text-lg w-6 text-center {{ request()->routeIs('profile.*') ? 'text-white' : 'group-hover:text-white' }}"></i>
+                    Mi Perfil
                 </a>
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="fa-solid fa-users-gear mr-3 text-lg w-6 text-center group-hover:text-white"></i>
-                    Usuarios
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-gear mr-3 text-lg w-6 text-center"></i>
+                    <span>Ajustes del Cementerio</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
+                </a>
+                
+                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
+                    <i class="fa-solid fa-users-gear mr-3 text-lg w-6 text-center"></i>
+                    <span>Usuarios</span>
+                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
                 </a>
             </div>
         @endif
     </nav>
 
-    <!-- System Status Footer -->
+    {{-- System Status Footer --}}
     <div class="border-t border-slate-800 p-4 bg-slate-950 flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
             <span class="text-xs text-slate-400">Estado del Sistema</span>
@@ -133,7 +204,7 @@
         </div>
         <div class="text-xs text-slate-500">Uptime: 99.98% • Latencia: 142ms</div>
         
-        <!-- Logout Button -->
+        {{-- Logout Button --}}
         <form method="POST" action="{{ route('logout') }}" class="mt-3">
             @csrf
             <button type="submit" class="w-full flex items-center justify-center px-4 py-2 border border-slate-700 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-colors">

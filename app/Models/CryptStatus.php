@@ -2,18 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CryptStatus extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'code',
         'name',
         'color',
-        'icon',
         'is_available_for_sale',
         'is_operational',
         'order',
@@ -24,4 +21,9 @@ class CryptStatus extends Model
         'is_operational' => 'boolean',
         'order' => 'integer',
     ];
+
+    public function crypts(): HasMany
+    {
+        return $this->hasMany(Crypt::class);
+    }
 }
