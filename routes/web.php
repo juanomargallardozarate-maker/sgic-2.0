@@ -112,6 +112,13 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
             Route::get('crypts/create', [\App\Http\Controllers\Inventory\CryptController::class, 'create'])->name('crypts.create');
             Route::post('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'store'])->name('crypts.store');
             
+            // Mapa visual de criptas
+            Route::get('crypts/map', [\App\Http\Controllers\Inventory\CryptController::class, 'map'])->name('crypts.map');
+            
+            // Importación masiva de criptas
+            Route::get('crypts/import', [\App\Http\Controllers\Inventory\CryptController::class, 'showImport'])->name('crypts.import');
+            Route::post('crypts/import', [\App\Http\Controllers\Inventory\CryptController::class, 'import'])->name('crypts.import.store');
+            
             Route::get('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'show'])->name('crypts.show');
             Route::get('crypts/{crypt}/edit', [\App\Http\Controllers\Inventory\CryptController::class, 'edit'])->name('crypts.edit');
             Route::get('crypts/{crypt}/api', [\App\Http\Controllers\Inventory\CryptController::class, 'apiShow'])->name('crypts.api-show');
