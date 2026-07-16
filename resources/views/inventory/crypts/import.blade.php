@@ -37,7 +37,7 @@
                 2. Sube tu Archivo CSV
             </h3>
             
-            <form method="POST" action="{{ route('inventory.crypts.import-process') }}" enctype="multipart/form-data" class="space-y-4">
+            <form method="POST" action="{{ route('crypts.import.store') }}" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="flex items-center justify-center w-full">
                     <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
