@@ -9,9 +9,11 @@ use App\Models\CryptType;
 use App\Models\Section;
 use App\Models\Block;
 use App\Models\Level;
+use App\Services\Inventory\ImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CryptController extends Controller
 {
@@ -504,19 +506,23 @@ class CryptController extends Controller
      */
     public function downloadTemplate()
     {
-        $filename = 'plantilla_criptas.csv';
+        $filename = 'plantilla_criptas_sgic.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        // Columnas requeridas
-        $columns = ['code', 'level_id', 'crypt_type_id', 'crypt_status_id', 'capacity', 'price', 'dimensions', 'door_type', 'notes'];
+        // Columnas requeridas - Formato con jerarquía automática
+        $columns = ['seccion_codigo', 'bloque_codigo', 'nivel_codigo', 'cripta_codigo', 'tipo_codigo', 'capacidad', 'precio'];
         
         // Crear CSV con BOM para UTF-8 en Excel
         $output = "\xEF\xBB\xBF";
         $output .= implode(',', $columns) . "\n";
-        $output .= 'EJ-001,1,1,1,2,5000.00,1.5x2.0m,marble,Cripta de ejemplo\n';
+        // Datos de ejemplo
+        $output .= "A,1,1,001,crypt,2,15000.00\n";
+        $output .= "A,1,1,002,crypt,2,15000.00\n";
+        $output .= "A,1,2,001,niche,1,8500.00\n";
+        $output .= "B,2,1,001,mausoleum,4,45000.00\n";
 
         return response($output, 200, $headers);
     }
@@ -526,16 +532,106 @@ class CryptController extends Controller
      */
     public function import(Request $request)
     {
+        // Validar archivo
         $validated = $request->validate([
-            'file' => 'required|mimes:csv,txt,xlsx|max:10240',
+            'file' => 'required|mimes:csv,txt|max:10240',
+        ], [
+            'file.required' => 'Debes seleccionar un archivo CSV.',
+            'file.mimes' => 'Solo se permiten archivos CSV.',
+            'file.max' => 'El archivo no debe superar los 10MB.',
         ]);
 
         try {
-            // TODO: Implementar lógica de importación
-            return redirect()->route('inventory.crypts.index')
-                ->with('success', 'Importación completada exitosamente.');
+            // Verificar que el archivo exista
+            if (!$request->hasFile('file')) {
+                return back()->with('error', 'No se recibió ningún archivo.');
+            }
+
+            $file = $request->file('file');
+            
+            // Verificar que el archivo sea válido
+            if (!$file->isValid()) {
+                return back()->with('error', 'El archivo subido no es válido.');
+            }
+
+            // Obtener tenant_id
+            $tenantId = auth()->user()->tenant_id;
+            
+            // Fallback para SuperAdmin
+            if (!$tenantId) {
+                $tenantId = \App\Models\Tenant::where('is_active', true)
+                    ->orderBy('created_at', 'desc')
+                    ->value('id');
+                    
+                if (!$tenantId) {
+                    return back()->with('error', 'No hay tenants disponibles para importar.');
+                }
+            }
+
+            Log::info('Iniciando importación', [
+                'tenant_id' => $tenantId,
+                'file_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+            ]);
+
+            // Guardar archivo en disco local
+            $path = $file->store('imports', 'local');
+            
+            if (!$path) {
+                Log::error('Error al guardar archivo');
+                return back()->with('error', 'Error al guardar el archivo.');
+            }
+
+            Log::info('Archivo guardado', ['path' => $path]);
+
+            // Usar Storage::path() para obtener ruta correcta
+            $fullPath = Storage::disk('local')->path($path);
+            
+            Log::info('Ruta completa del archivo', ['full_path' => $fullPath]);
+
+            // Verificar que el archivo exista físicamente
+            if (!file_exists($fullPath)) {
+                Log::error('Archivo no encontrado en ruta: ' . $fullPath);
+                return back()->with('error', 'El archivo no se guardó correctamente.');
+            }
+
+            // Procesar importación
+            Log::info('Iniciando servicio de importación');
+            $service = new ImportService($tenantId);
+            $report = $service->processFile($fullPath);
+            
+            Log::info('Importación completada', $report);
+            
+            // Limpiar archivo temporal
+            Storage::disk('local')->delete($path);
+
+            // Calcular estadísticas
+            $totalRows = $report['success'] + $report['warnings'] + count($report['errors']);
+
+            // Retornar con reporte
+            if (empty($report['errors']) && $report['success'] > 0) {
+                return redirect()->route('inventory.crypts.index')->with([
+                    'success' => "Importación completada: {$report['success']} criptas creadas exitosamente.",
+                    'import_stats' => [
+                        'total' => $totalRows,
+                        'success' => $report['success'],
+                        'warnings' => $report['warnings'],
+                        'errors' => count($report['errors']),
+                    ]
+                ]);
+            }
+
+            return back()->with('import_report', $report);
+            
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al importar: ' . $e->getMessage());
+            Log::error('Error fatal en importación', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with('error', 'Error fatal: ' . $e->getMessage());
         }
     }
 }
