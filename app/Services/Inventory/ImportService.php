@@ -82,17 +82,23 @@ class ImportService
             'precio'
         ];
 
-        if ($header !== $expectedHeaders) {
+        // Limpiar encabezados: trim de espacios y caracteres invisibles (BOM, etc.)
+        $cleanHeader = array_map(function($h) {
+            return trim($h, " \t\n\r\0\x0B\xEF\xBB\xBF");
+        }, $header);
+
+        if ($cleanHeader !== $expectedHeaders) {
             fclose($handle);
             Log::error('Encabezados inválidos', [
                 'expected' => $expectedHeaders,
-                'got' => $header
+                'got' => $header,
+                'cleaned' => $cleanHeader
             ]);
             return [
                 'success' => 0,
                 'errors' => [[
                     'row' => 0,
-                    'message' => 'Encabezados inválidos. Esperado: ' . implode(', ', $expectedHeaders)
+                    'message' => 'Encabezados inválidos. Esperado: ' . implode(', ', $expectedHeaders) . '. Obtenido: ' . implode(', ', $cleanHeader)
                 ]],
                 'warnings' => 0
             ];
