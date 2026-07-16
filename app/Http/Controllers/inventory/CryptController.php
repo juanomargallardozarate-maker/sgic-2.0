@@ -500,6 +500,28 @@ class CryptController extends Controller
     }
 
     /**
+     * Descargar plantilla de ejemplo para importación
+     */
+    public function downloadTemplate()
+    {
+        $filename = 'plantilla_criptas.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        // Columnas requeridas
+        $columns = ['code', 'level_id', 'crypt_type_id', 'crypt_status_id', 'capacity', 'price', 'dimensions', 'door_type', 'notes'];
+        
+        // Crear CSV con BOM para UTF-8 en Excel
+        $output = "\xEF\xBB\xBF";
+        $output .= implode(',', $columns) . "\n";
+        $output .= 'EJ-001,1,1,1,2,5000.00,1.5x2.0m,marble,Cripta de ejemplo\n';
+
+        return response($output, 200, $headers);
+    }
+
+    /**
      * Procesar importación masiva de criptas
      */
     public function import(Request $request)
