@@ -1,42 +1,99 @@
-```
-# Laravel-specific ignores
-vendor/
-storage/
-bootstrap/cache/
-public/storage
+# Dependencies
+node_modules/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
 .env
 .env.local
-.env.*
-!.env.example
+*.env.*
 
-# PHP
-*.php~
-*.phtml~
-
-# Composer
-composer.lock
-composer.phar
-
-# Logs
-*.log
-storage/logs/
-
-# Database
-database/seeds/
-database/factories/
-
-# IDE
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
+# Laravel specific
+public/hot
+public/storage
+storage/framework/cache/data
+storage/logs
+.npm
+.yarn
+artisan
+
+# Coverage directory used by tools like istanbul
 coverage/
-htmlcov/
-.coverage
-```
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
+
+# Compiled binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Compressed archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.phpunit.result.cache
+.phpunit
+tests/_output/
+
+# Laravel Mix
+mix-manifest.json
+public/css/app.css
+public/js/app.js
+
+# Vite
+vite.config.js.timestamp-*

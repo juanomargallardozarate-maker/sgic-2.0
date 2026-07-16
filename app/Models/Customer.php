@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Traits\BelongsToTenant;
 
 class Customer extends Model
@@ -14,109 +13,43 @@ class Customer extends Model
     use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
-        'tenant_id',
         'type',
-        'rfc',
-        'curp',
-        'legal_name',
-        'commercial_name',
+        'rfc_encrypted',
+        'rfc_hash',
+        'curp_encrypted',
+        'name',
         'email',
         'phone',
         'mobile',
-        'street',
-        'exterior_number',
-        'interior_number',
-        'neighborhood',
-        'city',
-        'state',
-        'zip_code',
-        'country',
+        'address',
+        'ine_url',
+        'proof_of_address_url',
+        'is_deceased',
+        'deceased_at',
+        'death_certificate_url',
+        'heir_declaration_url',
         'notes',
-        'metadata',
+        'is_active',
     ];
 
     protected $casts = [
-        'metadata' => 'array',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
+        'is_deceased' => 'boolean',
+        'deceased_at' => 'date',
+        'is_active' => 'boolean',
     ];
 
-    /**
-     * Relación con el tenant
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
-    /**
-     * Relación con contratos
-     */
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class);
     }
 
-    /**
-     * Relación con beneficiarios (a través de contratos)
-     */
-    public function beneficiaries(): HasManyThrough
+    public function beneficiaries(): HasMany
     {
-        return $this->hasManyThrough(Beneficiary::class, Contract::class);
+        return $this->hasMany(Beneficiary::class);
     }
 
-    /**
-     * Scope para buscar por RFC
-     */
-    public function scopeByRfc($query, string $rfc)
+    public function heirs(): HasMany
     {
-        return $query->where('rfc', $rfc);
-    }
-
-    /**
-     * Scope para buscar por email
-     */
-    public function scopeByEmail($query, string $email)
-    {
-        return $query->where('email', $email);
-    }
-
-    /**
-     * Scope para búsqueda global
-     */
-    public function scopeSearch($query, string $search)
-    {
-        return $query->where(function ($q) use ($search) {
-            $q->where('legal_name', 'like', "%{$search}%")
-              ->orWhere('commercial_name', 'like', "%{$search}%")
-              ->orWhere('rfc', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%");
-        });
-    }
-
-    /**
-     * Obtener nombre completo formateado
-     */
-    public function getFullNameAttribute(): string
-    {
-        return $this->commercial_name ?? $this->legal_name;
-    }
-
-    /**
-     * Obtener dirección completa formateada
-     */
-    public function getFullAddressAttribute(): string
-    {
-        $address = "{$this->street} #{$this->exterior_number}";
-        
-        if ($this->interior_number) {
-            $address .= " Int. {$this->interior_number}";
-        }
-        
-        $address .= ", {$this->neighborhood}, {$this->city}, {$this->state} C.P. {$this->zip_code}";
-        
-        return $address;
+        return $this->hasMany(Heir::class);
     }
 }
