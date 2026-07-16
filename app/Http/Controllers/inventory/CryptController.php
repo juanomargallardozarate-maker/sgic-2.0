@@ -490,4 +490,30 @@ class CryptController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Mostrar formulario de importación masiva
+     */
+    public function showImport()
+    {
+        return view('inventory.crypts.import');
+    }
+
+    /**
+     * Procesar importación masiva de criptas
+     */
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|mimes:csv,txt,xlsx|max:10240',
+        ]);
+
+        try {
+            // TODO: Implementar lógica de importación
+            return redirect()->route('inventory.crypts.index')
+                ->with('success', 'Importación completada exitosamente.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al importar: ' . $e->getMessage());
+        }
+    }
 }
