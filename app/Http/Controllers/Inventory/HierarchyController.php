@@ -13,12 +13,25 @@ use Illuminate\Support\Facades\Log;
 class HierarchyController extends Controller
 {
     /**
-     * Constructor con middleware de seguridad
+     * Constructor con autorización de seguridad
      * Solo administradores pueden acceder a esta funcionalidad
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'role:super_admin|admin_cemetery|admin']);
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check()) {
+                return redirect()->route('login');
+            }
+            
+            $user = auth()->user();
+            $allowedRoles = ['super_admin', 'admin_cemetery', 'admin'];
+            
+            if (!$user->hasAnyRole($allowedRoles)) {
+                abort(403, 'No tienes permiso para acceder a esta funcionalidad.');
+            }
+            
+            return $next($request);
+        });
     }
 
     /**
