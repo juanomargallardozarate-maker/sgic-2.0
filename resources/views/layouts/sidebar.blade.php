@@ -109,6 +109,14 @@
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Inventario</div>
                 
+                @if(auth()->user()->hasRole(['super_admin', 'admin_cemetery', 'admin']))
+                    <a href="{{ route('inventory.hierarchy.index') }}" 
+                       class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('inventory.hierarchy.*') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                        <i class="fa-solid fa-sitemap mr-3 text-lg w-6 text-center {{ request()->routeIs('inventory.hierarchy.*') ? 'text-white' : 'group-hover:text-white' }}"></i>
+                        Infraestructura
+                    </a>
+                @endif
+                
                 <a href="{{ route('inventory.crypts.index') }}" 
                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('inventory.crypts.index') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
                     <i class="fa-solid fa-layer-group mr-3 text-lg w-6 text-center {{ request()->routeIs('inventory.crypts.index') ? 'text-white' : 'group-hover:text-white' }}"></i>

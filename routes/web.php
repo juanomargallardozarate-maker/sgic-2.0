@@ -70,6 +70,39 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
         Route::prefix('inventory')->name('inventory.')->group(function () {
 
             // ==========================================
+            // GESTIÓN DE JERARQUÍA (SOLO ADMINISTRADORES)
+            // ==========================================
+            Route::middleware(['role:super_admin|admin_cemetery|admin'])
+                ->prefix('hierarchy')
+                ->name('hierarchy.')
+                ->group(function () {
+                    
+                    // Vista principal de jerarquía
+                    Route::get('/', [\App\Http\Controllers\Inventory\HierarchyController::class, 'index'])->name('index');
+                    
+                    // Secciones
+                    Route::get('sections/create', [\App\Http\Controllers\Inventory\HierarchyController::class, 'createSection'])->name('sections.create');
+                    Route::post('sections', [\App\Http\Controllers\Inventory\HierarchyController::class, 'storeSection'])->name('sections.store');
+                    Route::get('sections/{section}/edit', [\App\Http\Controllers\Inventory\HierarchyController::class, 'editSection'])->name('sections.edit');
+                    Route::put('sections/{section}', [\App\Http\Controllers\Inventory\HierarchyController::class, 'updateSection'])->name('sections.update');
+                    Route::delete('sections/{section}', [\App\Http\Controllers\Inventory\HierarchyController::class, 'destroySection'])->name('sections.destroy');
+                    
+                    // Bloques
+                    Route::get('blocks/create', [\App\Http\Controllers\Inventory\HierarchyController::class, 'createBlock'])->name('blocks.create');
+                    Route::post('blocks', [\App\Http\Controllers\Inventory\HierarchyController::class, 'storeBlock'])->name('blocks.store');
+                    Route::get('blocks/{block}/edit', [\App\Http\Controllers\Inventory\HierarchyController::class, 'editBlock'])->name('blocks.edit');
+                    Route::put('blocks/{block}', [\App\Http\Controllers\Inventory\HierarchyController::class, 'updateBlock'])->name('blocks.update');
+                    Route::delete('blocks/{block}', [\App\Http\Controllers\Inventory\HierarchyController::class, 'destroyBlock'])->name('blocks.destroy');
+                    
+                    // Niveles
+                    Route::get('levels/create', [\App\Http\Controllers\Inventory\HierarchyController::class, 'createLevel'])->name('levels.create');
+                    Route::post('levels', [\App\Http\Controllers\Inventory\HierarchyController::class, 'storeLevel'])->name('levels.store');
+                    Route::get('levels/{level}/edit', [\App\Http\Controllers\Inventory\HierarchyController::class, 'editLevel'])->name('levels.edit');
+                    Route::put('levels/{level}', [\App\Http\Controllers\Inventory\HierarchyController::class, 'updateLevel'])->name('levels.update');
+                    Route::delete('levels/{level}', [\App\Http\Controllers\Inventory\HierarchyController::class, 'destroyLevel'])->name('levels.destroy');
+                });
+
+            // ==========================================
             // 1. RUTAS ESTÁTICAS (SIN PARÁMETROS) - PRIMERO
             // ==========================================
             
