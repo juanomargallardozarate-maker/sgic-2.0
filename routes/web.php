@@ -118,6 +118,7 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
             // Importación masiva de criptas
             Route::get('crypts/import', [\App\Http\Controllers\Inventory\CryptController::class, 'showImport'])->name('crypts.import');
             Route::post('crypts/import', [\App\Http\Controllers\Inventory\CryptController::class, 'import'])->name('crypts.import.store');
+            Route::get('crypts/import-template', [\App\Http\Controllers\Inventory\CryptController::class, 'downloadTemplate'])->name('crypts.import-template');
             
             Route::get('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'show'])->name('crypts.show');
             Route::get('crypts/{crypt}/edit', [\App\Http\Controllers\Inventory\CryptController::class, 'edit'])->name('crypts.edit');
