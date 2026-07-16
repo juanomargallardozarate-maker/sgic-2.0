@@ -9,6 +9,7 @@ use App\Models\Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class HierarchyController extends Controller
 {
@@ -18,20 +19,8 @@ class HierarchyController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check()) {
-                return redirect()->route('login');
-            }
-            
-            $user = auth()->user();
-            $allowedRoles = ['super_admin', 'admin_cemetery', 'admin'];
-            
-            if (!$user->hasAnyRole($allowedRoles)) {
-                abort(403, 'No tienes permiso para acceder a esta funcionalidad.');
-            }
-            
-            return $next($request);
-        });
+        // La lógica de middleware se ha movido a las rutas para compatibilidad con Laravel 11
+        // Los middlewares 'auth' y 'role' ya están aplicados en la definición de la ruta
     }
 
     /**
