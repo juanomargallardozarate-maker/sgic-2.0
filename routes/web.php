@@ -107,6 +107,11 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
             // ==========================================
             // 2. RUTAS CON PARÁMETROS - AL FINAL
             // ==========================================
+            // Listado de criptas (índice)
+            Route::get('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'index'])->name('crypts.index');
+            Route::get('crypts/create', [\App\Http\Controllers\Inventory\CryptController::class, 'create'])->name('crypts.create');
+            Route::post('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'store'])->name('crypts.store');
+            
             Route::get('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'show'])->name('crypts.show');
             Route::get('crypts/{crypt}/edit', [\App\Http\Controllers\Inventory\CryptController::class, 'edit'])->name('crypts.edit');
             Route::get('crypts/{crypt}/api', [\App\Http\Controllers\Inventory\CryptController::class, 'apiShow'])->name('crypts.api-show');
