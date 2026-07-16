@@ -15,43 +15,49 @@ class Contract extends Model
     use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'customer_id',
         'crypt_id',
         'contract_type_id',
         'contract_number',
+        'status',
         'start_date',
         'end_date',
-        'price',
-        'annual_maintenance_fee',
-        'payment_type',
-        'installments_count',
-        'is_succession_pending',
-        'heir_document_url',
-        'succession_completed_at',
+        'signed_date',
+        'expiry_warning_sent_at',
+        'total_amount',
+        'amount_paid',
+        'balance',
+        'payment_installments',
+        'installments_paid',
+        'digital_signature_hash',
+        'ip_address_at_signing',
         'signed_at',
-        'signature_hash',
-        'signature_ip',
-        'signed_document_url',
-        'status',
-        'grace_period_ends_at',
-        'decay_process_started_at',
-        'notes',
-        'created_by_user_id',
+        'special_conditions',
+        'metadata',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'price' => 'decimal:2',
-        'annual_maintenance_fee' => 'decimal:2',
-        'is_succession_pending' => 'boolean',
-        'succession_completed_at' => 'datetime',
+        'signed_date' => 'date',
+        'expiry_warning_sent_at' => 'datetime',
+        'total_amount' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
+        'balance' => 'decimal:2',
         'signed_at' => 'datetime',
-        'grace_period_ends_at' => 'date',
-        'decay_process_started_at' => 'date',
+        'metadata' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     // Relaciones
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
@@ -87,20 +93,15 @@ class Contract extends Model
         return $this->hasMany(Invoice::class);
     }
 
-    public function debts(): HasMany
-    {
-        return $this->hasMany(Debt::class);
-    }
-
-    // Accessors (RN-02, RN-03)
+    // Accessors (RN-02)
     public function getIsPerpetualAttribute(): bool
     {
-        return !$this->contractType->is_temporary;
+        return $this->contractType->modality === 'perpetual';
     }
 
     public function getIsTemporaryAttribute(): bool
     {
-        return $this->contractType->is_temporary;
+        return $this->contractType->modality === 'temporary';
     }
 
     public function getIsExpiredAttribute(): bool
@@ -114,9 +115,9 @@ class Contract extends Model
         return now()->diffInDays($this->end_date, false);
     }
 
-    public function getIsInGracePeriodAttribute(): bool
+    public function getIsSignedAttribute(): bool
     {
-        return $this->status === 'grace_period';
+        return $this->status === 'active' && $this->signed_at !== null;
     }
 
     // Scopes
@@ -127,12 +128,12 @@ class Contract extends Model
 
     public function scopeTemporary($query)
     {
-        return $query->whereHas('contractType', fn($q) => $q->where('is_temporary', true));
+        return $query->whereHas('contractType', fn($q) => $q->where('modality', 'temporary'));
     }
 
     public function scopePerpetual($query)
     {
-        return $query->whereHas('contractType', fn($q) => $q->where('is_temporary', false));
+        return $query->whereHas('contractType', fn($q) => $q->where('modality', 'perpetual'));
     }
 
     public function scopeExpiringSoon($query, int $days = 90)
@@ -148,64 +149,60 @@ class Contract extends Model
         return $query->temporary()
                      ->whereNotNull('end_date')
                      ->where('end_date', '<', now())
-                     ->whereIn('status', ['active', 'expired', 'grace_period']);
+                     ->whereIn('status', ['active', 'expired']);
     }
 
-    public function scopeInGracePeriod($query)
+    public function scopeInSuccession($query)
     {
-        return $query->where('status', 'grace_period');
+        return $query->where('status', 'in_succession');
     }
 
-    public function scopeSuccessionPending($query)
+    public function scopePendingSignature($query)
     {
-        return $query->where('is_succession_pending', true);
+        return $query->where('status', 'pending_signature');
     }
 
-    // Métodos de negocio (RN-03)
-    public function enterGracePeriod(int $years): void
-    {
-        $this->update([
-            'status' => 'grace_period',
-            'grace_period_ends_at' => $this->end_date->addYears($years),
-        ]);
-    }
-
-    public function startDecayProcess(): void
+    // Métodos de negocio
+    public function sign(string $signatureHash, string $ipAddress): void
     {
         $this->update([
-            'status' => 'decaying',
-            'decay_process_started_at' => now(),
-        ]);
-        $this->crypt->changeStatus('decaying');
-    }
-
-    public function renew(Carbon $newEndDate, float $newPrice): self
-    {
-        $renewed = $this->replicate()->fill([
-            'start_date' => $this->end_date->addDay(),
-            'end_date' => $newEndDate,
-            'price' => $newPrice,
             'status' => 'active',
-            'contract_number' => $this->generateContractNumber(),
+            'signed_at' => now(),
+            'signed_date' => now()->format('Y-m-d'),
+            'digital_signature_hash' => $signatureHash,
+            'ip_address_at_signing' => $ipAddress,
         ]);
-        $renewed->save();
-        $this->update(['status' => 'renewed']);
-        return $renewed;
+    }
+
+    public function expire(): void
+    {
+        $this->update(['status' => 'expired']);
+    }
+
+    public function cancel(): void
+    {
+        $this->update(['status' => 'cancelled']);
+    }
+
+    public function startSuccession(): void
+    {
+        $this->update(['status' => 'in_succession']);
+    }
+
+    public function completeSuccession(): void
+    {
+        $this->update(['status' => 'active']);
     }
 
     public function canBeTransferred(): bool
     {
-        return !$this->is_succession_pending &&
-               $this->debts()->where('status', '!=', 'paid')->count() === 0;
+        return $this->status !== 'in_succession' && 
+               $this->balance <= 0;
     }
 
-    protected function generateContractNumber(): string
+    public function getProgressPercentageAttribute(): float
     {
-        $year = now()->format('Y');
-        $last = self::withoutGlobalScope(\App\Models\Scopes\TenantScope::class)
-                    ->where('tenant_id', auth()->user()->tenant_id)
-                    ->whereYear('created_at', $year)
-                    ->max('id') ?? 0;
-        return sprintf('CTR-%s-%05d', $year, $last + 1);
+        if ($this->payment_installments <= 0) return 100.00;
+        return round(($this->installments_paid / $this->payment_installments) * 100, 2);
     }
 }
