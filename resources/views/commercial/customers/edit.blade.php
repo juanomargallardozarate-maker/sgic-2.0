@@ -5,7 +5,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Encabezado -->
             <div class="mb-6">
-                <a href="{{ route('commercial.customers.show', $customer) }}" 
+                <a href="{{ route('inventory.commercial.customers.show', $customer) }}" 
                    class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 mb-3">
                     <i class="fa-solid fa-arrow-left mr-2"></i>
                     Volver al detalle
@@ -20,7 +20,7 @@
             </div>
 
             <!-- Formulario -->
-            <form action="{{ route('commercial.customers.update', $customer) }}" method="POST" class="space-y-6">
+            <form action="{{ route('inventory.commercial.customers.update', $customer) }}" method="POST" class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -255,7 +255,7 @@
 
                 <!-- Botones de acción -->
                 <div class="flex items-center justify-end space-x-4">
-                    <a href="{{ route('commercial.customers.show', $customer) }}" 
+                    <a href="{{ route('inventory.commercial.customers.show', $customer) }}" 
                        class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                         Cancelar
                     </a>
