@@ -1,1 +1,21 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a PHP source code file (`app/Services/Inventory/ImportService.php`), which should not be ignored. There are no build artifacts, dependencies, temporary files, or other items that require ignoring.
+```
+# Laravel-specific ignores
+vendor/
+node_modules/
+public/storage
+bootstrap/cache/
+storage/logs/
+storage/framework/
+.npm
+.yarn
+.env
+.env.local
+.env.*
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+.vscode/
+.idea/
+```
