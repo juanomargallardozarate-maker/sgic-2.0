@@ -129,21 +129,21 @@
             </div>
 
             {{-- ============================================ --}}
-            {{-- SECCIÓN COMERCIAL (Próximamente) --}}
+            {{-- SECCIÓN COMERCIAL (Clientes y Contratos) --}}
             {{-- ============================================ --}}
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Comercial</div>
                 
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
-                    <i class="fa-solid fa-users mr-3 text-lg w-6 text-center"></i>
+                <a href="{{ route('commercial.customers.index') }}" 
+                   class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('commercial.customers.*') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                    <i class="fa-solid fa-users mr-3 text-lg w-6 text-center {{ request()->routeIs('commercial.customers.*') ? 'text-white' : 'group-hover:text-white' }}"></i>
                     <span>Clientes</span>
-                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
                 </a>
                 
-                <a href="#" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed opacity-60" title="Módulo en desarrollo">
-                    <i class="fa-solid fa-file-contract mr-3 text-lg w-6 text-center"></i>
+                <a href="{{ route('commercial.contracts.index') }}" 
+                   class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('commercial.contracts.*') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
+                    <i class="fa-solid fa-file-contract mr-3 text-lg w-6 text-center {{ request()->routeIs('commercial.contracts.*') ? 'text-white' : 'group-hover:text-white' }}"></i>
                     <span>Contratos</span>
-                    <span class="ml-auto text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded">Próximamente</span>
                 </a>
             </div>
 
