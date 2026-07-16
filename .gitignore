@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a PHP view template (`resources/views/inventory/crypts/import.blade.php`), which is source code and should not be ignored. No build artifacts, dependencies, or temporary files are present in the changes.
+Nothing needs to be added to the .gitignore file based on the provided file changes. The changes consist only of PHP source files (.php), which should not be ignored according to the rules.
