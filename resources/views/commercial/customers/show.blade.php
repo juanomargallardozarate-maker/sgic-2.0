@@ -24,8 +24,8 @@
                             {{ $customer->name }}
                         </h2>
                         <p class="mt-1 text-sm text-slate-500">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $customer->type === 'individual' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                {{ $customer->type === 'individual' ? 'Persona Física' : 'Empresa' }}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $customer->type === 'persona_fisica' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                {{ $customer->type === 'persona_fisica' ? 'Persona Física' : 'Empresa' }}
                             </span>
                             @if($customer->is_deceased)
                                 <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">

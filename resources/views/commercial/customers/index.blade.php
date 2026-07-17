@@ -128,8 +128,8 @@
                             <label for="type" class="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
                             <select name="type" id="type" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm">
                                 <option value="">Todos</option>
-                                <option value="individual" {{ request('type') === 'individual' ? 'selected' : '' }}>Persona Física</option>
-                                <option value="company" {{ request('type') === 'company' ? 'selected' : '' }}>Empresa</option>
+                                <option value="persona_fisica" {{ request('type') === 'persona_fisica' ? 'selected' : '' }}>Persona Física</option>
+                                <option value="persona_moral" {{ request('type') === 'persona_moral' ? 'selected' : '' }}>Empresa</option>
                             </select>
                         </div>
 
@@ -205,8 +205,8 @@
 
                                         <!-- Tipo -->
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $customer->type === 'individual' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                                {{ $customer->type === 'individual' ? 'Persona Física' : 'Empresa' }}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $customer->type === 'persona_fisica' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                                {{ $customer->type === 'persona_fisica' ? 'Persona Física' : 'Empresa' }}
                                             </span>
                                         </td>
 
