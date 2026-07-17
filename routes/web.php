@@ -132,11 +132,6 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
                 Route::get('contracts/export', [\App\Http\Controllers\Commercial\ContractController::class, 'export'])->name('contracts.export');
             });
 
-            // Rutas rápidas para crear jerarquía (AJAX)
-            Route::post('hierarchy/sections', [\App\Http\Controllers\Inventory\CryptController::class, 'storeSection'])->name('hierarchy.sections.store');
-            Route::post('hierarchy/blocks', [\App\Http\Controllers\Inventory\CryptController::class, 'storeBlock'])->name('hierarchy.blocks.store');
-            Route::post('hierarchy/levels', [\App\Http\Controllers\Inventory\CryptController::class, 'storeLevel'])->name('hierarchy.levels.store');
-
             // ==========================================
             // 2. RUTAS CON PARÁMETROS - AL FINAL
             // ==========================================

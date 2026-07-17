@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Section;
 use App\Models\Block;
 use App\Models\Level;
+use App\Events\HierarchyChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -131,10 +132,18 @@ class HierarchyController extends Controller
         $validated['tenant_id'] = $tenantId;
         $validated['is_active'] = true;
 
-        Section::create($validated);
+        $section = Section::create($validated);
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Sección {$validated['code']} creada exitosamente.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('section', 'created', [
+            'id' => $section->id,
+            'code' => $section->code,
+            'name' => $section->name,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Sección {$validated['code']} creada exitosamente.")
+            ->with('hierarchy_changed', json_encode(['type' => 'section', 'action' => 'created']));
     }
 
     /**
@@ -178,8 +187,16 @@ class HierarchyController extends Controller
 
         $section->update($validated);
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Sección {$section->code} actualizada exitosamente.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('section', 'updated', [
+            'id' => $section->id,
+            'code' => $section->code,
+            'name' => $section->name,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Sección {$section->code} actualizada exitosamente.")
+            ->with('hierarchy_changed', json_encode(['type' => 'section', 'action' => 'updated']));
     }
 
     /**
@@ -197,10 +214,18 @@ class HierarchyController extends Controller
         }
 
         $sectionName = $section->code;
+        $sectionId = $section->id;
         $section->delete();
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Sección {$sectionName} eliminada exitosamente.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('section', 'deleted', [
+            'id' => $sectionId,
+            'code' => $sectionName,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Sección {$sectionName} eliminada exitosamente.")
+            ->with('hierarchy_changed', json_encode(['type' => 'section', 'action' => 'deleted']));
     }
 
     /**
@@ -260,10 +285,18 @@ class HierarchyController extends Controller
         $validated['tenant_id'] = $section->tenant_id;
         $validated['is_active'] = true;
 
-        Block::create($validated);
+        $block = Block::create($validated);
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Bloque {$validated['code']} creado exitosamente en sección {$section->code}.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('block', 'created', [
+            'id' => $block->id,
+            'code' => $block->code,
+            'section_id' => $block->section_id,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Bloque {$validated['code']} creado exitosamente en sección {$section->code}.")
+            ->with('hierarchy_changed', json_encode(['type' => 'block', 'action' => 'created']));
     }
 
     /**
@@ -313,8 +346,16 @@ class HierarchyController extends Controller
 
         $block->update($validated);
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Bloque {$block->code} actualizado exitosamente.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('block', 'updated', [
+            'id' => $block->id,
+            'code' => $block->code,
+            'section_id' => $block->section_id,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Bloque {$block->code} actualizado exitosamente.")
+            ->with('hierarchy_changed', json_encode(['type' => 'block', 'action' => 'updated']));
     }
 
     /**
@@ -332,10 +373,18 @@ class HierarchyController extends Controller
         }
 
         $blockName = $block->code;
+        $blockId = $block->id;
         $block->delete();
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Bloque {$blockName} eliminado exitosamente.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('block', 'deleted', [
+            'id' => $blockId,
+            'code' => $blockName,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Bloque {$blockName} eliminado exitosamente.")
+            ->with('hierarchy_changed', json_encode(['type' => 'block', 'action' => 'deleted']));
     }
 
     /**
@@ -395,10 +444,18 @@ class HierarchyController extends Controller
         $validated['tenant_id'] = $block->tenant_id;
         $validated['is_active'] = true;
 
-        Level::create($validated);
+        $level = Level::create($validated);
 
-        return redirect()->route('inventory.hierarchy.index')
-            ->with('success', "Nivel {$validated['code']} creado exitosamente en bloque {$block->code}.");
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('level', 'created', [
+            'id' => $level->id,
+            'code' => $level->code,
+            'block_id' => $level->block_id,
+        ]);
+
+        return redirect()->route('inventory.crypts.map')
+            ->with('success', "Nivel {$validated['code']} creado exitosamente en bloque {$block->code}.")
+            ->with('hierarchy_changed', json_encode(['type' => 'level', 'action' => 'created']));
     }
 
     /**
@@ -448,6 +505,13 @@ class HierarchyController extends Controller
 
         $level->update($validated);
 
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('level', 'updated', [
+            'id' => $level->id,
+            'code' => $level->code,
+            'block_id' => $level->block_id,
+        ]);
+
         return redirect()->route('inventory.hierarchy.index')
             ->with('success', "Nivel {$level->code} actualizado exitosamente.");
     }
@@ -467,7 +531,14 @@ class HierarchyController extends Controller
         }
 
         $levelName = $level->code;
+        $levelId = $level->id;
         $level->delete();
+
+        // Disparar evento para notificar cambio en la jerarquía
+        HierarchyChanged::dispatch('level', 'deleted', [
+            'id' => $levelId,
+            'code' => $levelName,
+        ]);
 
         return redirect()->route('inventory.hierarchy.index')
             ->with('success', "Nivel {$levelName} eliminado exitosamente.");
