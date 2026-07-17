@@ -20,7 +20,7 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Customer::with(['contracts', 'beneficiaries'])
+        $query = Customer::with(['contracts', 'beneficiaries.beneficiaryCustomer'])
             ->orderBy('created_at', 'desc');
 
         // Filtros
@@ -162,7 +162,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        $customer->load(['contracts.crypt.level.block.section', 'beneficiaries.customer', 'heirs.customer']);
+        $customer->load(['contracts.crypt.level.block.section', 'beneficiaries.customer', 'beneficiaries.beneficiaryCustomer', 'heirs.customer']);
 
         // Desencriptar RFC y CURP para visualización
         $rfc = null;
@@ -376,7 +376,7 @@ class CustomerController extends Controller
     public function export(Request $request)
     {
         // Implementación básica de exportación
-        $customers = Customer::with(['contracts', 'beneficiaries'])->get();
+        $customers = Customer::with(['contracts', 'beneficiaries.beneficiaryCustomer'])->get();
 
         $headers = [
             'Content-Type' => 'text/csv',
