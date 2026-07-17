@@ -357,12 +357,6 @@
                 <div class="space-y-6">
                     <!-- Beneficiarios -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                            <h3 class="text-lg font-semibold text-slate-900">
-                                <i class="fa-solid fa-user-group mr-2 text-emerald-600"></i>
-                                Beneficiarios
-                            </h3>
-                        </div>
                         <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-slate-900">
                                 <i class="fa-solid fa-user-group mr-2 text-emerald-600"></i>
