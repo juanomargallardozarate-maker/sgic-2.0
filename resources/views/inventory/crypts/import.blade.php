@@ -40,8 +40,8 @@
             <form method="POST" action="{{ route('inventory.crypts.import.store') }}" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="flex items-center justify-center w-full">
-                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors" id="dropzone-label">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6" id="dropzone-content">
                             <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-3"></i>
                             <p class="mb-2 text-sm text-slate-500">
                                 <span class="font-semibold text-slate-700">Haz clic para subir</span> o arrastra el archivo
@@ -51,6 +51,31 @@
                         <input id="dropzone-file" type="file" name="file" class="hidden" accept=".csv" required />
                     </label>
                 </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const fileInput = document.getElementById('dropzone-file');
+                        const dropzoneContent = document.getElementById('dropzone-content');
+                        const dropzoneLabel = document.getElementById('dropzone-label');
+                        
+                        fileInput.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (file) {
+                                const fileName = file.name;
+                                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                                
+                                dropzoneContent.innerHTML = `
+                                    <i class="fa-solid fa-file-csv text-4xl text-emerald-600 mb-3"></i>
+                                    <p class="text-sm font-semibold text-slate-700 mb-1">${fileName}</p>
+                                    <p class="text-xs text-slate-500">${fileSize} MB</p>
+                                    <p class="text-xs text-emerald-600 mt-2"><i class="fa-solid fa-check mr-1"></i>Archivo listo para subir</p>
+                                `;
+                                
+                                dropzoneLabel.classList.remove('border-slate-300', 'bg-slate-50');
+                                dropzoneLabel.classList.add('border-emerald-500', 'bg-emerald-50');
+                            }
+                        });
+                    });
+                </script>
                 <div class="flex justify-end">
                     <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                         <i class="fa-solid fa-upload mr-2"></i> Procesar Importación
