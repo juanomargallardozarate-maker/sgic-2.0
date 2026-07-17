@@ -439,16 +439,40 @@ class CustomerController extends Controller
 
         DB::beginTransaction();
         try {
-            // Si es primary, quitar el flag de otros beneficiarios
+            // Validar que no se duplique el mismo beneficiario con el mismo cliente
+            $existingBeneficiary = Beneficiary::where('customer_id', $customer->id)
+                ->where('beneficiary_customer_id', $validated['beneficiary_customer_id'])
+                ->first();
+            
+            if ($existingBeneficiary) {
+                return back()->withErrors(['beneficiary_customer_id' => 'Este cliente ya está registrado como beneficiario.']);
+            }
+
+            // Validar que un cliente solo pueda tener 2 beneficiarios
+            $beneficiariesCount = Beneficiary::where('customer_id', $customer->id)->count();
+            if ($beneficiariesCount >= 2) {
+                return back()->withErrors(['error' => 'Un cliente solo puede tener máximo 2 beneficiarios.']);
+            }
+
+            // Si es primary, validar que no haya otro primario y quitar el flag de otros si es necesario
             if ($validated['is_primary']) {
                 Beneficiary::where('customer_id', $customer->id)
                     ->update(['is_primary' => false]);
+            } else {
+                // Validar que si ya hay un primario, no se pueda agregar otro sin marcarlo como primario
+                $hasPrimary = Beneficiary::where('customer_id', $customer->id)
+                    ->where('is_primary', true)
+                    ->exists();
+                
+                // Si ya hay uno primario y este no se marca como tal, está bien
+                // Pero si intentamos agregar uno nuevo sin especificar is_primary y ya hay uno, dejemos que siga
             }
 
             Beneficiary::create([
                 'tenant_id' => Auth::user()->tenant_id,
                 'contract_id' => null, // No contract required for general beneficiary
-                'customer_id' => $validated['beneficiary_customer_id'],
+                'customer_id' => $customer->id,
+                'beneficiary_customer_id' => $validated['beneficiary_customer_id'],
                 'relationship' => $validated['relationship'],
                 'is_primary' => $validated['is_primary'] ?? false,
             ]);
