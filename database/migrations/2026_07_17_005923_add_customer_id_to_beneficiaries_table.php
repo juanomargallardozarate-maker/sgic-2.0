@@ -13,18 +13,21 @@ return new class extends Migration
     {
         Schema::table('beneficiaries', function (Blueprint $table) {
             // Renombrar customer_id a beneficiary_customer_id para mayor claridad
-            // customer_id será el ID del cliente dueño del beneficiario
-            // beneficiary_customer_id será el ID del cliente que es beneficiario
-            $table->renameColumn('customer_id', 'beneficiary_customer_id');
+            // Solo si customer_id existe y beneficiary_customer_id no existe
+            if (Schema::hasColumn('beneficiaries', 'customer_id') && !Schema::hasColumn('beneficiaries', 'beneficiary_customer_id')) {
+                $table->renameColumn('customer_id', 'beneficiary_customer_id');
+            }
         });
 
         Schema::table('beneficiaries', function (Blueprint $table) {
             // Agregar customer_id que es el cliente dueño del beneficiario
-            $table->foreignId('customer_id')
-                ->after('beneficiary_customer_id')
-                ->constrained()
-                ->onDelete('cascade')
-                ->name('beneficiaries_customer_foreign');
+            if (!Schema::hasColumn('beneficiaries', 'customer_id')) {
+                $table->foreignId('customer_id')
+                    ->after('beneficiary_customer_id')
+                    ->constrained()
+                    ->onDelete('cascade')
+                    ->name('beneficiaries_customer_foreign');
+            }
             
             // Actualizar índice único para prevenir duplicados
             $table->dropUnique(['contract_id', 'beneficiary_customer_id']);
