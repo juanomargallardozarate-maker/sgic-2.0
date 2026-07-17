@@ -260,7 +260,7 @@
                                             @if($primaryBeneficiary)
                                                 <div class="text-xs text-emerald-600 font-medium">
                                                     <i class="fa-solid fa-star mr-1"></i>
-                                                    {{ $primaryBeneficiary->customer->name ?? 'N/A' }}
+                                                    {{ $primaryBeneficiary->beneficiaryCustomer->name ?? 'N/A' }}
                                                 </div>
                                             @endif
                                         </td>
