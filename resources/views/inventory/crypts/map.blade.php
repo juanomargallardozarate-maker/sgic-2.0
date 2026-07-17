@@ -525,5 +525,34 @@
                 }
             }
         }
+
+        // Escuchar eventos de cambio en la jerarquía para refrescar el mapa
+        document.addEventListener('alpine:init', () => {
+            window.Livewire?.on?.('hierarchy-changed', (event) => {
+                console.log('🔄 Evento de jerarquía detectado:', event);
+                // Recargar la página para mostrar los cambios
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            });
+        });
+
+        // Escuchar eventos personalizados desde el backend
+        @if(session('hierarchy_changed'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.log('📢 Cambio en jerarquía detectado desde session');
+                    setTimeout(() => {
+                        if (window.Alpine) {
+                            window.dispatchEvent(new CustomEvent('hierarchy-changed', {
+                                detail: {{ session('hierarchy_changed') }}
+                            }));
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 300);
+                });
+            </script>
+        @endif
     </script>
 </x-app-layout>
