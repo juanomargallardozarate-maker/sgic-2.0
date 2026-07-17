@@ -88,6 +88,10 @@ class CustomerController extends Controller
             'phone' => 'nullable|string|max:20',
             'mobile' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            'colonia' => 'nullable|string|max:150',
+            'ciudad' => 'nullable|string|max:100',
+            'estado' => 'nullable|string|max:100',
+            'codigo_postal' => 'nullable|string|max:10',
             'ine_url' => 'nullable|string|max:500',
             'proof_of_address_url' => 'nullable|string|max:500',
             'notes' => 'nullable|string|max:1000',
@@ -130,6 +134,10 @@ class CustomerController extends Controller
                 'phone' => $validated['phone'],
                 'mobile' => $validated['mobile'],
                 'address' => $validated['address'],
+                'colonia' => $validated['colonia'],
+                'ciudad' => $validated['ciudad'],
+                'estado' => $validated['estado'],
+                'codigo_postal' => $validated['codigo_postal'],
                 'ine_url' => $validated['ine_url'],
                 'proof_of_address_url' => $validated['proof_of_address_url'],
                 'is_deceased' => false,
@@ -139,7 +147,7 @@ class CustomerController extends Controller
 
             DB::commit();
 
-            return redirect()->route('commercial.customers.show', $customer)
+            return redirect()->route('inventory.commercial.customers.index')
                 ->with('success', 'Cliente registrado exitosamente.');
 
         } catch (\Exception $e) {
@@ -216,6 +224,10 @@ class CustomerController extends Controller
             'phone' => 'nullable|string|max:20',
             'mobile' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            'colonia' => 'nullable|string|max:150',
+            'ciudad' => 'nullable|string|max:100',
+            'estado' => 'nullable|string|max:100',
+            'codigo_postal' => 'nullable|string|max:10',
             'ine_url' => 'nullable|string|max:500',
             'proof_of_address_url' => 'nullable|string|max:500',
             'notes' => 'nullable|string|max:1000',
@@ -242,6 +254,10 @@ class CustomerController extends Controller
                 'phone' => $validated['phone'],
                 'mobile' => $validated['mobile'],
                 'address' => $validated['address'],
+                'colonia' => $validated['colonia'],
+                'ciudad' => $validated['ciudad'],
+                'estado' => $validated['estado'],
+                'codigo_postal' => $validated['codigo_postal'],
                 'ine_url' => $validated['ine_url'],
                 'proof_of_address_url' => $validated['proof_of_address_url'],
                 'notes' => $validated['notes'],
@@ -431,7 +447,8 @@ class CustomerController extends Controller
 
             Beneficiary::create([
                 'tenant_id' => Auth::user()->tenant_id,
-                'customer_id' => $customer->id,
+                'contract_id' => null, // No contract required for general beneficiary
+                'customer_id' => $validated['beneficiary_customer_id'],
                 'relationship' => $validated['relationship'],
                 'is_primary' => $validated['is_primary'] ?? false,
             ]);
