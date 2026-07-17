@@ -23,7 +23,8 @@ return new class extends Migration
             $table->foreignId('customer_id')
                 ->after('beneficiary_customer_id')
                 ->constrained()
-                ->onDelete('cascade');
+                ->onDelete('cascade')
+                ->name('beneficiaries_customer_foreign');
             
             // Actualizar índice único para prevenir duplicados
             $table->dropUnique(['contract_id', 'beneficiary_customer_id']);
