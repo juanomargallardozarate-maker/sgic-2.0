@@ -31,7 +31,7 @@ class Beneficiary extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    public function beneficiary()
+    public function beneficiaryCustomer()
     {
         return $this->belongsTo(Customer::class, 'beneficiary_customer_id');
     }
