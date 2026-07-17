@@ -451,7 +451,7 @@ class CustomerController extends Controller
             // Validar que un cliente solo pueda tener 2 beneficiarios
             $beneficiariesCount = Beneficiary::where('customer_id', $customer->id)->count();
             if ($beneficiariesCount >= 2) {
-                return back()->withErrors(['error' => 'Un cliente solo puede tener máximo 2 beneficiarios.']);
+                return back()->withErrors(['error' => 'Ya se alcanzó el número máximo de beneficiarios (2). Para agregar un nuevo beneficiario, primero debe eliminar uno de los existentes.']);
             }
 
             // Si es primary, validar que no haya otro primario y quitar el flag de otros si es necesario
