@@ -384,7 +384,7 @@
                                                 </div>
                                                 <div class="ml-3">
                                                     <p class="text-sm font-medium text-slate-900">
-                                                        {{ $beneficiary->customer->name ?? 'N/A' }}
+                                                        {{ $beneficiary->beneficiaryCustomer->name ?? 'N/A' }}
                                                     </p>
                                                     <p class="text-xs text-slate-500">
                                                         {{ $beneficiary->relationship }}
