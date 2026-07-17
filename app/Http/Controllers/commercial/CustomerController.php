@@ -80,7 +80,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|in:individual,company',
+            'type' => 'required|in:persona_fisica,persona_moral',
             'rfc' => 'required|string|max:13',
             'curp' => 'nullable|string|max:18',
             'name' => 'required|string|max:255',
@@ -93,7 +93,7 @@ class CustomerController extends Controller
             'notes' => 'nullable|string|max:1000',
         ], [
             'type.required' => 'El tipo de cliente es obligatorio.',
-            'type.in' => 'El tipo debe ser "individual" o "empresa".',
+            'type.in' => 'El tipo debe ser "persona_fisica" o "persona_moral".',
             'rfc.required' => 'El RFC es obligatorio.',
             'rfc.max' => 'El RFC no debe exceder 13 caracteres.',
             'curp.max' => 'La CURP no debe exceder 18 caracteres.',
@@ -208,7 +208,7 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
-            'type' => 'required|in:individual,company',
+            'type' => 'required|in:persona_fisica,persona_moral',
             'rfc' => 'required|string|max:13',
             'curp' => 'nullable|string|max:18',
             'name' => 'required|string|max:255',

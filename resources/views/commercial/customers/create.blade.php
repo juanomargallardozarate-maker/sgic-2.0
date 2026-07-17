@@ -40,8 +40,8 @@
                             <select name="type" id="type" required 
                                     class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('type') border-red-500 @enderror">
                                 <option value="">Seleccionar...</option>
-                                <option value="individual" {{ old('type') === 'individual' ? 'selected' : '' }}>Persona Física</option>
-                                <option value="company" {{ old('type') === 'company' ? 'selected' : '' }}>Empresa</option>
+                                <option value="persona_fisica" {{ old('type') === 'persona_fisica' ? 'selected' : '' }}>Persona Física</option>
+                                <option value="persona_moral" {{ old('type') === 'persona_moral' ? 'selected' : '' }}>Empresa</option>
                             </select>
                             @error('type')
                                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -51,7 +51,7 @@
                         <!-- Nombre / Razón Social -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-slate-700 mb-1">
-                                <span x-text="document.getElementById('type').value === 'company' ? 'Razón Social' : 'Nombre Completo'">Nombre Completo</span> 
+                                <span x-text="document.getElementById('type').value === 'persona_moral' ? 'Razón Social' : 'Nombre Completo'">Nombre Completo</span> 
                                 <span class="text-red-500">*</span>
                             </label>
                             <input type="text" 
@@ -272,7 +272,7 @@
         // Actualizar label de nombre según tipo de cliente
         document.getElementById('type').addEventListener('change', function() {
             const label = this.parentElement.nextElementSibling.querySelector('label span:first-child');
-            if (this.value === 'company') {
+            if (this.value === 'persona_moral') {
                 label.textContent = 'Razón Social ';
             } else {
                 label.textContent = 'Nombre Completo ';
