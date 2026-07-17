@@ -8,6 +8,66 @@
             ->get();
     @endphp
 
+    <!-- Notificaciones de sesión -->
+    @if (session('success'))
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+            <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-lg shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-check-circle text-emerald-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-emerald-800">{{ session('success') }}</p>
+                    </div>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="ml-auto text-emerald-500 hover:text-emerald-700">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-exclamation-circle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                    </div>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="ml-auto text-red-500 hover:text-red-700">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-sm font-semibold text-red-800 mb-2">Errores de validación:</h4>
+                        <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="ml-auto text-red-500 hover:text-red-700">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Encabezado -->
