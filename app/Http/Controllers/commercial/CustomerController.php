@@ -455,7 +455,7 @@ class CustomerController extends Controller
             }
 
             // Si es primary, validar que no haya otro primario y quitar el flag de otros si es necesario
-            if ($validated['is_primary']) {
+            if ($validated['is_primary'] ?? false) {
                 Beneficiary::where('customer_id', $customer->id)
                     ->update(['is_primary' => false]);
             } else {
