@@ -172,20 +172,99 @@
                                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Dirección -->
-                        <div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                        <h3 class="text-lg font-semibold text-slate-900">
+                            <i class="fa-solid fa-location-dot mr-2 text-emerald-600"></i>
+                            Domicilio
+                        </h3>
+                    </div>
+                    
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Dirección (Calle y número) -->
+                        <div class="md:col-span-2">
                             <label for="address" class="block text-sm font-medium text-slate-700 mb-1">
-                                Dirección <span class="text-slate-400">(Opcional)</span>
+                                Calle y Número <span class="text-slate-400">(Opcional)</span>
                             </label>
                             <input type="text" 
                                    name="address" 
                                    id="address" 
                                    value="{{ old('address', $customer->address) }}" 
                                    maxlength="500"
-                                   placeholder="Calle, número, colonia, CP..."
+                                   placeholder="Calle, número exterior, número interior..."
                                    class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('address') border-red-500 @enderror">
                             @error('address')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Colonia -->
+                        <div>
+                            <label for="colonia" class="block text-sm font-medium text-slate-700 mb-1">
+                                Colonia <span class="text-slate-400">(Opcional)</span>
+                            </label>
+                            <input type="text" 
+                                   name="colonia" 
+                                   id="colonia" 
+                                   value="{{ old('colonia', $customer->colonia) }}" 
+                                   maxlength="150"
+                                   placeholder="Colonia o barrio"
+                                   class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('colonia') border-red-500 @enderror">
+                            @error('colonia')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Ciudad -->
+                        <div>
+                            <label for="ciudad" class="block text-sm font-medium text-slate-700 mb-1">
+                                Ciudad <span class="text-slate-400">(Opcional)</span>
+                            </label>
+                            <input type="text" 
+                                   name="ciudad" 
+                                   id="ciudad" 
+                                   value="{{ old('ciudad', $customer->ciudad) }}" 
+                                   maxlength="100"
+                                   placeholder="Ciudad o municipio"
+                                   class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('ciudad') border-red-500 @enderror">
+                            @error('ciudad')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Estado -->
+                        <div>
+                            <label for="estado" class="block text-sm font-medium text-slate-700 mb-1">
+                                Estado <span class="text-slate-400">(Opcional)</span>
+                            </label>
+                            <input type="text" 
+                                   name="estado" 
+                                   id="estado" 
+                                   value="{{ old('estado', $customer->estado) }}" 
+                                   maxlength="100"
+                                   placeholder="Estado o entidad federativa"
+                                   class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('estado') border-red-500 @enderror">
+                            @error('estado')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Código Postal -->
+                        <div>
+                            <label for="codigo_postal" class="block text-sm font-medium text-slate-700 mb-1">
+                                Código Postal <span class="text-slate-400">(Opcional)</span>
+                            </label>
+                            <input type="text" 
+                                   name="codigo_postal" 
+                                   id="codigo_postal" 
+                                   value="{{ old('codigo_postal', $customer->codigo_postal) }}" 
+                                   maxlength="10"
+                                   placeholder="Ej: 06600"
+                                   class="w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('codigo_postal') border-red-500 @enderror">
+                            @error('codigo_postal')
                                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

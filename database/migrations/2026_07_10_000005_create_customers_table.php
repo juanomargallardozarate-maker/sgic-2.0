@@ -20,6 +20,10 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->string('mobile', 20)->nullable();
             $table->text('address')->nullable();
+            $table->string('colonia', 150)->nullable();
+            $table->string('ciudad', 100)->nullable();
+            $table->string('estado', 100)->nullable();
+            $table->string('codigo_postal', 10)->nullable();
             $table->string('ine_url', 500)->nullable();
             $table->string('proof_of_address_url', 500)->nullable();
             $table->boolean('is_deceased')->default(false);
