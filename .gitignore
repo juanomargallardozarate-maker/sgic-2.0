@@ -11,61 +11,36 @@ target/
 # Dependencies
 node_modules/
 vendor/
-*.lock
+composer.lock
+.env
+.env.local
+.env.*
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
-
-# Environment
-.env
-.env.local
-*.env.*
 
 # Editors
 .vscode/
 .idea/
 *.swp
+*.swo
 
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
 
-# Python specific
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-.installed.cfg
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.eggs/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.nox/
-.coverage.*
-.cache
-.pytest_cache/
-.mypy_cache/
-
 # PHP specific
-*.phar
-vendor/
-composer.lock
+*.php~
+.php_cs.cache
+
+# Laravel specific
+storage/
+bootstrap/cache/
 ```
