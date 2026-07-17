@@ -153,7 +153,7 @@ class ContractController extends Controller
                     Beneficiary::create([
                         'tenant_id' => Auth::user()->tenant_id,
                         'contract_id' => $contract->id,
-                        'customer_id' => $beneficiary['customer_id'],
+                        'beneficiary_customer_id' => $beneficiary['customer_id'],
                         'relationship' => $beneficiary['relationship'],
                         'is_primary' => $beneficiary['is_primary'] ?? false,
                     ]);
