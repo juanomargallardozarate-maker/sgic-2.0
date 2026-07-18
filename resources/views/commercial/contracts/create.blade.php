@@ -212,23 +212,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const priceInput = document.getElementById('price');
     
     if (cryptSelect && priceInput) {
-        cryptSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
+        function updatePrice() {
+            const selectedOption = cryptSelect.options[cryptSelect.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
-            if (price && price > 0) {
+            console.log('Precio seleccionado:', price); // Debug
+            if (price && !isNaN(price) && parseFloat(price) > 0) {
                 priceInput.value = parseFloat(price).toFixed(2);
-                // Disparar evento input para asegurar reactividad
-                priceInput.dispatchEvent(new Event('input'));
+                // Disparar eventos para asegurar reactividad
+                priceInput.dispatchEvent(new Event('input', { bubbles: true }));
+                priceInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
-        });
+        }
+        
+        cryptSelect.addEventListener('change', updatePrice);
+        cryptSelect.addEventListener('input', updatePrice);
         
         // Trigger initial price update if crypt is pre-selected
         if (cryptSelect.value) {
-            const selectedOption = cryptSelect.options[cryptSelect.selectedIndex];
-            const price = selectedOption.getAttribute('data-price');
-            if (price && price > 0) {
-                priceInput.value = parseFloat(price).toFixed(2);
-            }
+            updatePrice();
         }
     }
 
