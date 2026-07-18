@@ -42,6 +42,64 @@ class Customer extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Get the decrypted RFC attribute.
+     */
+    public function getRfcAttribute(): ?string
+    {
+        if (!$this->rfc_encrypted) {
+            return null;
+        }
+        
+        try {
+            $key = config('app.key');
+            $ivLength = openssl_cipher_iv_length('AES-256-CBC');
+            
+            $encrypted = base64_decode($this->rfc_encrypted);
+            if ($encrypted === false) {
+                return $this->rfc_encrypted;
+            }
+            
+            $iv = substr($encrypted, 0, $ivLength);
+            $encryptedData = substr($encrypted, $ivLength);
+            
+            $decrypted = openssl_decrypt($encryptedData, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+            
+            return $decrypted ?: $this->rfc_encrypted;
+        } catch (\Exception $e) {
+            return $this->rfc_encrypted;
+        }
+    }
+
+    /**
+     * Get the decrypted CURP attribute.
+     */
+    public function getCurpAttribute(): ?string
+    {
+        if (!$this->curp_encrypted) {
+            return null;
+        }
+        
+        try {
+            $key = config('app.key');
+            $ivLength = openssl_cipher_iv_length('AES-256-CBC');
+            
+            $encrypted = base64_decode($this->curp_encrypted);
+            if ($encrypted === false) {
+                return $this->curp_encrypted;
+            }
+            
+            $iv = substr($encrypted, 0, $ivLength);
+            $encryptedData = substr($encrypted, $ivLength);
+            
+            $decrypted = openssl_decrypt($encryptedData, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+            
+            return $decrypted ?: $this->curp_encrypted;
+        } catch (\Exception $e) {
+            return $this->curp_encrypted;
+        }
+    }
+
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class);
