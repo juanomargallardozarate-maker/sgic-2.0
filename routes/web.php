@@ -121,6 +121,16 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
                 Route::post('customers/{customer}/beneficiaries', [\App\Http\Controllers\Commercial\CustomerController::class, 'addBeneficiary'])->name('customers.beneficiaries.add');
                 Route::delete('customers/{customer}/beneficiaries/{beneficiary}', [\App\Http\Controllers\Commercial\CustomerController::class, 'removeBeneficiary'])->name('customers.beneficiaries.remove');
 
+                // CRUD completo de reservas (US-3.3)
+                Route::resource('reservations', \App\Http\Controllers\Commercial\ReservationController::class);
+
+                // Acciones específicas de reservas
+                Route::post('reservations/{reservation}/extend', [\App\Http\Controllers\Commercial\ReservationController::class, 'extend'])->name('reservations.extend');
+                Route::post('reservations/{reservation}/cancel', [\App\Http\Controllers\Commercial\ReservationController::class, 'cancel'])->name('reservations.cancel');
+                Route::post('reservations/{reservation}/convert', [\App\Http\Controllers\Commercial\ReservationController::class, 'convertToContract'])->name('reservations.convert');
+                Route::post('reservations/{reservation}/mark-expired', [\App\Http\Controllers\Commercial\ReservationController::class, 'markAsExpired'])->name('reservations.mark-expired');
+                Route::get('reservations/export', [\App\Http\Controllers\Commercial\ReservationController::class, 'export'])->name('reservations.export');
+
                 // CRUD completo de contratos
                 Route::resource('contracts', \App\Http\Controllers\Commercial\ContractController::class);
 
