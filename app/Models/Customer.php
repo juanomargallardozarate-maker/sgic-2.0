@@ -57,11 +57,11 @@ class Customer extends Model
         }
         
         try {
-            $key = config('app.key');
+            $key = base64_decode(str_replace('base64:', '', config('app.key')));
             $ivLength = openssl_cipher_iv_length('AES-256-CBC');
             
             $encrypted = base64_decode($this->rfc_encrypted);
-            if ($encrypted === false) {
+            if ($encrypted === false || strlen($encrypted) < $ivLength) {
                 return $this->rfc_encrypted;
             }
             
@@ -86,11 +86,11 @@ class Customer extends Model
         }
         
         try {
-            $key = config('app.key');
+            $key = base64_decode(str_replace('base64:', '', config('app.key')));
             $ivLength = openssl_cipher_iv_length('AES-256-CBC');
             
             $encrypted = base64_decode($this->curp_encrypted);
-            if ($encrypted === false) {
+            if ($encrypted === false || strlen($encrypted) < $ivLength) {
                 return $this->curp_encrypted;
             }
             
