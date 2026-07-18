@@ -42,6 +42,11 @@ class Customer extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = [
+        'rfc',
+        'curp',
+    ];
+
     /**
      * Get the decrypted RFC attribute.
      */

@@ -102,6 +102,7 @@ class ContractController extends Controller
             'annual_maintenance_fee' => 'required|numeric|min:0',
             'payment_type' => 'required|in:cash,installments,mixed',
             'installments_count' => 'nullable|integer|min:1',
+            'down_payment' => 'nullable|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
             'beneficiaries' => 'nullable|array',
@@ -113,6 +114,12 @@ class ContractController extends Controller
             'contract_type_id.required' => 'Debe seleccionar un tipo de contrato.',
             'end_date.after' => 'La fecha de vigencia debe ser posterior a la fecha de inicio.',
         ]);
+
+        // Validar que el down_payment sea requerido si es pago mixto
+        if ($validated['payment_type'] === 'mixed' && empty($validated['down_payment'])) {
+            return back()->withErrors(['down_payment' => 'El pago mixto requiere un monto de enganche.'])
+                ->withInput();
+        }
 
         // Validar que la cripta esté disponible (RN-01)
         $crypt = Crypt::findOrFail($validated['crypt_id']);
@@ -142,6 +149,7 @@ class ContractController extends Controller
                 'annual_maintenance_fee' => $validated['annual_maintenance_fee'],
                 'payment_type' => $validated['payment_type'],
                 'installments_count' => $validated['installments_count'] ?? null,
+                'down_payment' => $validated['down_payment'] ?? null,
                 'status' => 'draft',
                 'notes' => $validated['notes'] ?? null,
                 'created_by_user_id' => Auth::id(),
@@ -244,10 +252,17 @@ class ContractController extends Controller
             'annual_maintenance_fee' => 'required|numeric|min:0',
             'payment_type' => 'required|in:cash,installments,mixed',
             'installments_count' => 'nullable|integer|min:1',
+            'down_payment' => 'nullable|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        // Validar que el down_payment sea requerido si es pago mixto
+        if ($validated['payment_type'] === 'mixed' && empty($validated['down_payment'])) {
+            return back()->withErrors(['down_payment' => 'El pago mixto requiere un monto de enganche.'])
+                ->withInput();
+        }
 
         // Validar que la cripta esté disponible (si cambió)
         if ($contract->crypt_id != $validated['crypt_id']) {

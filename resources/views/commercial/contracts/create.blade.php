@@ -28,7 +28,9 @@
                                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('customer_id') border-red-500 @enderror">
                             <option value="">Seleccionar cliente...</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }} 
+                                        data-rfc="{{ $customer->rfc ?? '' }}" 
+                                        data-curp="{{ $customer->curp ?? '' }}">
                                     {{ $customer->name }} - {{ $customer->rfc ?? $customer->curp ?? 'N/A' }}
                                 </option>
                             @endforeach
@@ -216,9 +218,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedOption = this.options[this.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
             if (price && price > 0) {
-                priceInput.value = price;
+                priceInput.value = parseFloat(price).toFixed(2);
+                // Disparar evento input para asegurar reactividad
+                priceInput.dispatchEvent(new Event('input'));
             }
         });
+        
+        // Trigger initial price update if crypt is pre-selected
+        if (cryptSelect.value) {
+            const selectedOption = cryptSelect.options[cryptSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            if (price && price > 0) {
+                priceInput.value = parseFloat(price).toFixed(2);
+            }
+        }
     }
 
     // === Manejo del campo de enganche para pago mixto ===
@@ -250,10 +263,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const startDateInput = document.querySelector('input[name="start_date"]');
     
     if (installmentsInput && startDateInput && endDateInput) {
-        installmentsInput.addEventListener('change', function() {
+        installmentsInput.addEventListener('input', function() {
             const months = parseInt(this.value);
             if (months > 0 && startDateInput.value) {
-                const startDate = new Date(startDateInput.value);
+                const startDate = new Date(startDateInput.value + 'T00:00:00');
                 const endDate = new Date(startDate);
                 endDate.setMonth(endDate.getMonth() + months);
                 
@@ -270,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         startDateInput.addEventListener('change', function() {
             const months = parseInt(installmentsInput.value);
             if (months > 0 && this.value) {
-                const startDate = new Date(this.value);
+                const startDate = new Date(this.value + 'T00:00:00');
                 const endDate = new Date(startDate);
                 endDate.setMonth(endDate.getMonth() + months);
                 
