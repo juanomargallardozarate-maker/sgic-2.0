@@ -25,6 +25,7 @@ class Contract extends Model
         'annual_maintenance_fee',
         'payment_type',
         'installments_count',
+        'down_payment',
         'is_succession_pending',
         'heir_document_url',
         'succession_completed_at',
