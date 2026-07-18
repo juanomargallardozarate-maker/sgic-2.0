@@ -71,4 +71,17 @@ class Crypt extends Model
     {
         return ($this->cryptStatus?->is_available_for_sale ?? false) && !$this->is_blocked;
     }
+
+    /**
+     * Change crypt status by code
+     * @param string $statusCode 'available', 'reserved', 'occupied', 'decaying', etc.
+     */
+    public function changeStatus(string $statusCode): void
+    {
+        $status = \App\Models\CryptStatus::where('code', $statusCode)->first();
+        if ($status) {
+            $this->crypt_status_id = $status->id;
+            $this->save();
+        }
+    }
 }

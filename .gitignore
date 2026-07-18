@@ -1,34 +1,86 @@
-```gitignore
-# Python
-__pycache__/
+```
+# Compiled and build artifacts
 *.pyc
-*.pyo
-*.pyd
-.Python
-venv/
-.venv/
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+vendor/
+node_modules/
+.npm/
+.yarn/
+bower_components/
+.jspm/
+
+# Build directories
+dist/
+build/
+target/
+.sass-cache/
+.hugo_build.lock
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+*.rej
+
+# Environment variables
 .env
 .env.local
 .env.*
-
-# Build and distribution artifacts
-dist/
-build/
-*.egg-info/
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.swp
-*~
-
-# OS specific
-.DS_Store
-Thumbs.db
+!.env.example
 
 # Editors
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+coverage/
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.tox/
+.nyc_output/
+istanbul.out
+
+# OS generated files
+ehthumbs.db
+Icon?
+.directory
+.Trashes
+*.nib
+*~.nib
+*.plist.bak
+
+# PHP specific
+*.php~
+.php_cs.cache
+.phpunit.result.cache
+!composer.phar
+
+# Laravel specific
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/bootstrap/cache/
+/public/storage
+!.env
+.env.backup
 ```
