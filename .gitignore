@@ -1,9 +1,10 @@
-```
 # Compiled and build artifacts
 *.pyc
 __pycache__/
 *.o
 *.obj
+dist/
+build/
 *.class
 *.exe
 *.dll
@@ -12,75 +13,60 @@ __pycache__/
 *.out
 
 # Dependencies
-vendor/
+.venv/
+venv/
 node_modules/
-.npm/
-.yarn/
-bower_components/
-.jspm/
-
-# Build directories
-dist/
-build/
 target/
-.sass-cache/
-.hugo_build.lock
+.gradle/
+.mypy_cache/
+.pytest_cache/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 *.swo
-*.bak
-*.orig
-*.rej
 
-# Environment variables
+# Environment
 .env
 .env.local
-.env.*
-!.env.example
+*.env.*
 
 # Editors
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
+*.swp
+*.swo
+
+# System files
 .DS_Store
 Thumbs.db
 
-# Testing
-.coverage
+# Coverage
 coverage/
 htmlcov/
-.pytest_cache/
-.mypy_cache/
-.tox/
-.nyc_output/
-istanbul.out
+.coverage
 
-# OS generated files
-ehthumbs.db
-Icon?
-.directory
-.Trashes
-*.nib
-*~.nib
-*.plist.bak
-
-# PHP specific
-*.php~
-.php_cs.cache
-.phpunit.result.cache
-!composer.phar
-
-# Laravel specific
-/storage/logs/
-/storage/framework/cache/
-/storage/framework/sessions/
-/storage/framework/views/
-/bootstrap/cache/
-/public/storage
-!.env
-.env.backup
-```
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
