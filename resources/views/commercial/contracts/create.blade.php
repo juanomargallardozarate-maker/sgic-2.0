@@ -28,10 +28,8 @@
                                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('customer_id') border-red-500 @enderror">
                             <option value="">Seleccionar cliente...</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }} 
-                                        data-rfc="{{ $customer->rfc ?? '' }}" 
-                                        data-curp="{{ $customer->curp ?? '' }}">
-                                    {{ $customer->name }} - {{ $customer->rfc ?? $customer->curp ?? 'N/A' }}
+                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->name }}
                                 </option>
                             @endforeach
                         </select>
