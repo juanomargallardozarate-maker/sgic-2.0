@@ -1,41 +1,22 @@
 ```
-# Dependency directories
-vendor/
+# Dependencies
 node_modules/
-
-# Build artifacts
-dist/
-build/
-target/
-
-# PHP specific
-*.php~
-*.php.bak
-*.log
-composer.lock
 
 # Environment
 .env
 .env.local
 .env.*
 
-# Cache and temporary files
-.cache/
+# Logs and temp files
+*.log
 *.tmp
-*.swp
-*.swo
 
-# IDE specific
+# Editors
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Laravel specific
-storage/
-bootstrap/cache/
+# Build artifacts
+dist/
+build/
+target/
 ```
