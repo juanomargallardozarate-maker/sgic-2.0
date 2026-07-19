@@ -84,16 +84,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio Total *</label>
-                        <input type="number" step="0.01" name="price" id="price" value="{{ old('price') }}" required
-                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('price') border-red-500 @enderror">
+                        <input type="number" step="0.01" name="price" id="price" value="{{ old('price') }}" required readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100 @error('price') border-red-500 @enderror">
                         @error('price')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cuota Anual de Mantenimiento *</label>
-                        <input type="number" step="0.01" name="annual_maintenance_fee" value="{{ old('annual_maintenance_fee') }}" required
-                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('annual_maintenance_fee') border-red-500 @enderror">
+                        <input type="number" step="0.01" name="annual_maintenance_fee" id="annual_maintenance_fee" value="{{ old('annual_maintenance_fee', $maintenanceFee) }}" required readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100 @error('annual_maintenance_fee') border-red-500 @enderror">
                         @error('annual_maintenance_fee')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -123,10 +123,28 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Enganche / Anticipo *</label>
                         <input type="number" step="0.01" name="down_payment" id="down_payment" value="{{ old('down_payment') }}" min="0"
                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                        <p class="text-xs text-gray-500 mt-1">Monto inicial que paga el cliente</p>
+                        <p class="text-xs text-gray-500 mt-1">Sugerido: 10% del precio total. Este monto se restará del precio para calcular el financiamiento.</p>
                         @error('down_payment')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Saldo a Financiar</label>
+                        <input type="number" step="0.01" name="financed_amount" id="financed_amount" value="{{ old('financed_amount', 0) }}" readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100">
+                        <p class="text-xs text-gray-500 mt-1">Precio total - Enganche</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tasa de Interés (%)</label>
+                        <input type="number" step="0.01" name="interest_rate" id="interest_rate" value="{{ old('interest_rate', 0) }}" readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100">
+                        <p class="text-xs text-gray-500 mt-1">Tasa anual según plazo</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mensualidad a Pagar</label>
+                        <input type="number" step="0.01" name="monthly_payment" id="monthly_payment" value="{{ old('monthly_payment', 0) }}" readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100">
+                        <p class="text-xs text-gray-500 mt-1">Calculado por método francés</p>
                     </div>
                 </div>
             </div>
@@ -144,11 +162,20 @@
                         @enderror
                     </div>
                     <div id="end_date_field">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento</label>
-                        <input type="date" name="end_date" value="{{ old('end_date') }}"
-                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('end_date') border-red-500 @enderror">
-                        <p class="text-xs text-gray-500 mt-1">Obligatorio para contratos temporales</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento del Contrato</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100 @error('end_date') border-red-500 @enderror">
+                        <p class="text-xs text-gray-500 mt-1">Se calcula automáticamente según el tipo de contrato</p>
                         @error('end_date')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin del Financiamiento</label>
+                        <input type="date" name="financing_end_date" id="financing_end_date" value="{{ old('financing_end_date') }}" readonly
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-100 @error('financing_end_date') border-red-500 @enderror">
+                        <p class="text-xs text-gray-500 mt-1">Se calcula automáticamente cuando hay parcialidades</p>
+                        @error('financing_end_date')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -187,47 +214,77 @@ document.addEventListener('DOMContentLoaded', function() {
     // === Manejo de Tipo de Contrato y Fecha de Vencimiento ===
     const contractTypeSelect = document.getElementById('contract_type_id');
     const endDateField = document.getElementById('end_date_field');
-    const endDateInput = endDateField.querySelector('input');
-    const endDateLabel = endDateField.querySelector('label');
-
-    function toggleEndDateField() {
+    const endDateInput = document.getElementById('end_date');
+    const financingEndDateInput = document.getElementById('financing_end_date');
+    
+    // Obtener datos del tipo de contrato seleccionado
+    function getContractTypeData() {
         const selectedOption = contractTypeSelect.options[contractTypeSelect.selectedIndex];
-        const isTemporary = selectedOption.text.includes('años');
+        const yearsText = selectedOption.getAttribute('data-years');
+        return yearsText ? parseInt(yearsText) : null;
+    }
 
-        if (isTemporary) {
-            endDateLabel.innerHTML = 'Fecha de Vencimiento *';
-            endDateInput.required = true;
+    function calculateContractEndDate() {
+        const startDateInput = document.querySelector('input[name="start_date"]');
+        if (!startDateInput || !startDateInput.value) return;
+        
+        const years = getContractTypeData();
+        if (years && years > 0) {
+            const startDate = new Date(startDateInput.value + 'T00:00:00');
+            const endDate = new Date(startDate);
+            endDate.setFullYear(endDate.getFullYear() + years);
+            
+            const year = endDate.getFullYear();
+            const month = String(endDate.getMonth() + 1).padStart(2, '0');
+            const day = String(endDate.getDate()).padStart(2, '0');
+            
+            endDateInput.value = `${year}-${month}-${day}`;
         } else {
-            endDateLabel.innerHTML = 'Fecha de Vencimiento';
-            endDateInput.required = false;
+            // Perpetuo: no hay fecha de vencimiento
             endDateInput.value = '';
         }
     }
+    
+    contractTypeSelect.addEventListener('change', calculateContractEndDate);
+    document.querySelector('input[name="start_date"]').addEventListener('change', calculateContractEndDate);
+    
+    // Calcular fecha inicial si ya hay datos
+    if (contractTypeSelect.value && document.querySelector('input[name="start_date"]').value) {
+        calculateContractEndDate();
+    }
 
-    contractTypeSelect.addEventListener('change', toggleEndDateField);
-    toggleEndDateField(); // Initial check
+    // === Obtener datos de configuración ===
+    const maintenanceFee = {{ $maintenanceFee ?? 0 }};
+    const interestRatesData = @json($interestRates ?? []);
+    
+    // Convertir a mapa para búsqueda rápida: { months: percentage }
+    const interestRatesMap = {};
+    interestRatesData.forEach(rate => {
+        interestRatesMap[rate.months] = rate.percentage;
+    });
 
-    // === Actualizar precio al seleccionar cripta ===
+    // === Actualizar precio y mantenimiento al seleccionar cripta ===
     const cryptSelect = document.getElementById('crypt_id');
     const priceInput = document.getElementById('price');
-    
+    const maintenanceFeeInput = document.getElementById('annual_maintenance_fee');
+
+    // Establecer cuota de mantenimiento inicial
+    if (maintenanceFeeInput) {
+        maintenanceFeeInput.value = maintenanceFee.toFixed(2);
+    }
+
     if (cryptSelect && priceInput) {
         function updatePrice() {
             const selectedOption = cryptSelect.options[cryptSelect.selectedIndex];
             const price = selectedOption.getAttribute('data-price');
-            console.log('Precio seleccionado:', price); // Debug
             if (price && !isNaN(price) && parseFloat(price) > 0) {
                 priceInput.value = parseFloat(price).toFixed(2);
-                // Disparar eventos para asegurar reactividad
-                priceInput.dispatchEvent(new Event('input', { bubbles: true }));
-                priceInput.dispatchEvent(new Event('change', { bubbles: true }));
+                calculateFinancing();
             }
         }
-        
+
         cryptSelect.addEventListener('change', updatePrice);
-        cryptSelect.addEventListener('input', updatePrice);
         
-        // Trigger initial price update if crypt is pre-selected
         if (cryptSelect.value) {
             updatePrice();
         }
@@ -237,30 +294,107 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentTypeSelect = document.getElementById('payment_type');
     const downPaymentField = document.getElementById('down_payment_field');
     const downPaymentInput = document.getElementById('down_payment');
-    
+
     if (paymentTypeSelect && downPaymentField) {
         paymentTypeSelect.addEventListener('change', function() {
             if (this.value === 'mixed') {
                 downPaymentField.style.display = 'block';
                 downPaymentInput.required = true;
+                // Sugerir 10% del precio total
+                const price = parseFloat(priceInput.value) || 0;
+                if (price > 0) {
+                    downPaymentInput.value = (price * 0.10).toFixed(2);
+                }
             } else {
                 downPaymentField.style.display = 'none';
                 downPaymentInput.required = false;
                 downPaymentInput.value = '';
             }
+            calculateFinancing();
         });
-        
+
         // Initial check
         if (paymentTypeSelect.value === 'mixed') {
             downPaymentField.style.display = 'block';
             downPaymentInput.required = true;
+            const price = parseFloat(priceInput.value) || 0;
+            if (price > 0 && !downPaymentInput.value) {
+                downPaymentInput.value = (price * 0.10).toFixed(2);
+            }
         }
     }
 
-    // === Calcular fecha de vencimiento basada en mensualidades ===
+    // === Escuchar cambios en enganche y mensualidades para recalcular ===
+    if (downPaymentInput) {
+        downPaymentInput.addEventListener('input', calculateFinancing);
+        downPaymentInput.addEventListener('change', calculateFinancing);
+    }
+
     const installmentsInput = document.getElementById('installments_count');
+    if (installmentsInput) {
+        installmentsInput.addEventListener('input', calculateFinancing);
+        installmentsInput.addEventListener('change', calculateFinancing);
+    }
+
+    // === Función principal para calcular financiamiento ===
+    function calculateFinancing() {
+        const price = parseFloat(priceInput.value) || 0;
+        const paymentType = paymentTypeSelect ? paymentTypeSelect.value : '';
+        const downPayment = parseFloat(downPaymentInput.value) || 0;
+        const months = parseInt(installmentsInput.value) || 0;
+
+        const financedAmountInput = document.getElementById('financed_amount');
+        const interestRateInput = document.getElementById('interest_rate');
+        const monthlyPaymentInput = document.getElementById('monthly_payment');
+
+        if (!financedAmountInput || !interestRateInput || !monthlyPaymentInput) return;
+
+        let financedAmount = 0;
+        let interestRate = 0;
+        let monthlyPayment = 0;
+
+        if (paymentType === 'cash') {
+            financedAmount = 0;
+            interestRate = 0;
+            monthlyPayment = 0;
+        } else if (paymentType === 'mixed') {
+            financedAmount = price - downPayment;
+            
+            if (months > 0 && financedAmount > 0) {
+                interestRate = interestRatesMap[months] || 0;
+                
+                if (interestRate > 0) {
+                    const i = interestRate / 100 / 12;
+                    const n = months;
+                    monthlyPayment = financedAmount * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+                } else {
+                    monthlyPayment = financedAmount / months;
+                }
+            }
+        } else if (paymentType === 'installments') {
+            financedAmount = price;
+            
+            if (months > 0) {
+                interestRate = interestRatesMap[months] || 0;
+                
+                if (interestRate > 0) {
+                    const i = interestRate / 100 / 12;
+                    const n = months;
+                    monthlyPayment = financedAmount * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+                } else {
+                    monthlyPayment = financedAmount / months;
+                }
+            }
+        }
+
+        financedAmountInput.value = financedAmount.toFixed(2);
+        interestRateInput.value = interestRate.toFixed(2);
+        monthlyPaymentInput.value = monthlyPayment.toFixed(2);
+    }
+
+    // === Calcular fecha de vencimiento basada en mensualidades ===
     const startDateInput = document.querySelector('input[name="start_date"]');
-    
+
     if (installmentsInput && startDateInput && endDateInput) {
         installmentsInput.addEventListener('input', function() {
             const months = parseInt(this.value);
@@ -268,28 +402,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const startDate = new Date(startDateInput.value + 'T00:00:00');
                 const endDate = new Date(startDate);
                 endDate.setMonth(endDate.getMonth() + months);
-                
-                // Formatear fecha como YYYY-MM-DD
+
                 const year = endDate.getFullYear();
                 const month = String(endDate.getMonth() + 1).padStart(2, '0');
                 const day = String(endDate.getDate()).padStart(2, '0');
-                
+
                 endDateInput.value = `${year}-${month}-${day}`;
             }
         });
-        
-        // También actualizar cuando cambia la fecha de inicio
+
         startDateInput.addEventListener('change', function() {
             const months = parseInt(installmentsInput.value);
             if (months > 0 && this.value) {
                 const startDate = new Date(this.value + 'T00:00:00');
                 const endDate = new Date(startDate);
                 endDate.setMonth(endDate.getMonth() + months);
-                
+
                 const year = endDate.getFullYear();
                 const month = String(endDate.getMonth() + 1).padStart(2, '0');
                 const day = String(endDate.getDate()).padStart(2, '0');
-                
+
                 endDateInput.value = `${year}-${month}-${day}`;
             }
         });

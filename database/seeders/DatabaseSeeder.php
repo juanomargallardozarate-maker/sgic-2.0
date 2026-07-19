@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             CatalogSeeder::class,
             ContractTypeSeeder::class,
+            SettingsSeeder::class,
             TenantSeeder::class,
         ]);
 
