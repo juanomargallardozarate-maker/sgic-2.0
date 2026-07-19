@@ -1,1 +1,7 @@
 Nothing should be ignored since the changes only include source files (.blade.php) without any build artifacts, dependencies, or temporary files.
+
+# managed
+**.data.json
+**.node-persist**
+**_IGNORE_**
+# end managed
