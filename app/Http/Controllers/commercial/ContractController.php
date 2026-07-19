@@ -9,6 +9,8 @@ use App\Models\Crypt;
 use App\Models\ContractType;
 use App\Models\Beneficiary;
 use App\Models\Heir;
+use App\Models\GlobalSetting;
+use App\Models\InterestRate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -83,8 +85,18 @@ class ContractController extends Controller
             ->where('is_blocked', false)
             ->with(['level.block.section'])
             ->get();
+        
+        // Obtener configuración global
+        $maintenanceFee = GlobalSetting::getValue('maintenance_fee', 1500.00);
+        $interestRates = InterestRate::getActiveRates();
 
-        return view('commercial.contracts.create', compact('contractTypes', 'customers', 'availableCrypts'));
+        return view('commercial.contracts.create', compact(
+            'contractTypes', 
+            'customers', 
+            'availableCrypts',
+            'maintenanceFee',
+            'interestRates'
+        ));
     }
 
     /**
@@ -94,6 +106,9 @@ class ContractController extends Controller
      */
     public function store(Request $request)
     {
+        // Obtener configuración global para validaciones
+        $maintenanceFeeConfig = GlobalSetting::getValue('maintenance_fee', 0);
+        
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'crypt_id' => 'required|exists:crypts,id',
@@ -103,6 +118,9 @@ class ContractController extends Controller
             'payment_type' => 'required|in:cash,installments,mixed',
             'installments_count' => 'nullable|integer|min:1',
             'down_payment' => 'nullable|numeric|min:0',
+            'financed_amount' => 'nullable|numeric|min:0',
+            'interest_rate' => 'nullable|numeric|min:0|max:100',
+            'monthly_payment' => 'nullable|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
             'beneficiaries' => 'nullable|array',
@@ -135,6 +153,72 @@ class ContractController extends Controller
                 ->withInput();
         }
 
+        // Recalcular valores financieros en el servidor (seguridad)
+        $price = $crypt->price; // El precio siempre viene de la cripta
+        $validated['price'] = $price;
+        
+        // Calcular saldo a financiar y pagos según tipo de pago
+        $financedAmount = 0;
+        $monthlyPayment = 0;
+        $interestRate = 0;
+        $financingEndDate = null;
+        
+        if ($validated['payment_type'] === 'cash') {
+            // Contado: no hay financiamiento, interés 0
+            $financedAmount = 0;
+            $interestRate = 0;
+            $monthlyPayment = 0;
+            $validated['installments_count'] = null;
+        } elseif ($validated['payment_type'] === 'mixed') {
+            // Mixto: precio - enganche
+            $downPayment = $validated['down_payment'] ?? 0;
+            $financedAmount = $price - $downPayment;
+            
+            if ($validated['installments_count'] > 0) {
+                $interestRateObj = InterestRate::getRateForMonths($validated['installments_count']);
+                $interestRate = $interestRateObj ? $interestRateObj->percentage : 0;
+                
+                // Método francés: M = P * [i(1+i)^n] / [(1+i)^n - 1]
+                if ($interestRate > 0 && $financedAmount > 0) {
+                    $i = $interestRate / 100 / 12; // Tasa mensual
+                    $n = $validated['installments_count'];
+                    $monthlyPayment = $financedAmount * ($i * pow(1 + $i, $n)) / (pow(1 + $i, $n) - 1);
+                } else {
+                    // Sin interés: división simple
+                    $monthlyPayment = $financedAmount / $validated['installments_count'];
+                }
+                
+                // Calcular fecha de fin del financiamiento
+                $financingEndDate = \Carbon\Carbon::parse($validated['start_date'])->addMonths($validated['installments_count']);
+            }
+        } elseif ($validated['payment_type'] === 'installments') {
+            // Crédito puro: todo se financia
+            $financedAmount = $price;
+            $validated['down_payment'] = 0;
+            
+            if ($validated['installments_count'] > 0) {
+                $interestRateObj = InterestRate::getRateForMonths($validated['installments_count']);
+                $interestRate = $interestRateObj ? $interestRateObj->percentage : 0;
+                
+                // Método francés
+                if ($interestRate > 0 && $financedAmount > 0) {
+                    $i = $interestRate / 100 / 12;
+                    $n = $validated['installments_count'];
+                    $monthlyPayment = $financedAmount * ($i * pow(1 + $i, $n)) / (pow(1 + $i, $n) - 1);
+                } else {
+                    $monthlyPayment = $financedAmount / $validated['installments_count'];
+                }
+                
+                // Calcular fecha de fin del financiamiento
+                $financingEndDate = \Carbon\Carbon::parse($validated['start_date'])->addMonths($validated['installments_count']);
+            }
+        }
+        
+        $validated['financed_amount'] = $financedAmount;
+        $validated['interest_rate'] = $interestRate;
+        $validated['monthly_payment'] = $monthlyPayment;
+        $validated['financing_end_date'] = $financingEndDate;
+
         DB::beginTransaction();
         try {
             // Crear contrato
@@ -145,11 +229,15 @@ class ContractController extends Controller
                 'contract_number' => $this->generateContractNumber(),
                 'start_date' => $validated['start_date'],
                 'end_date' => $validated['end_date'],
+                'financing_end_date' => $validated['financing_end_date'],
                 'price' => $validated['price'],
                 'annual_maintenance_fee' => $validated['annual_maintenance_fee'],
                 'payment_type' => $validated['payment_type'],
                 'installments_count' => $validated['installments_count'] ?? null,
                 'down_payment' => $validated['down_payment'] ?? null,
+                'financed_amount' => $validated['financed_amount'],
+                'interest_rate_applied' => $validated['interest_rate'],
+                'monthly_payment' => $validated['monthly_payment'],
                 'status' => 'draft',
                 'notes' => $validated['notes'] ?? null,
                 'created_by_user_id' => Auth::id(),
@@ -253,6 +341,9 @@ class ContractController extends Controller
             'payment_type' => 'required|in:cash,installments,mixed',
             'installments_count' => 'nullable|integer|min:1',
             'down_payment' => 'nullable|numeric|min:0',
+            'financed_amount' => 'nullable|numeric|min:0',
+            'interest_rate' => 'nullable|numeric|min:0|max:100',
+            'monthly_payment' => 'nullable|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
             'notes' => 'nullable|string|max:1000',
@@ -272,6 +363,59 @@ class ContractController extends Controller
                     ->withInput();
             }
         }
+
+        // Recalcular valores financieros en el servidor (seguridad)
+        $crypt = Crypt::findOrFail($validated['crypt_id']);
+        $price = $crypt->price;
+        $validated['price'] = $price;
+        
+        // Calcular saldo a financiar y pagos según tipo de pago
+        $financedAmount = 0;
+        $monthlyPayment = 0;
+        $interestRate = 0;
+        
+        if ($validated['payment_type'] === 'cash') {
+            $financedAmount = 0;
+            $interestRate = 0;
+            $monthlyPayment = 0;
+            $validated['installments_count'] = null;
+        } elseif ($validated['payment_type'] === 'mixed') {
+            $downPayment = $validated['down_payment'] ?? 0;
+            $financedAmount = $price - $downPayment;
+            
+            if ($validated['installments_count'] > 0) {
+                $interestRateObj = InterestRate::getRateForMonths($validated['installments_count']);
+                $interestRate = $interestRateObj ? $interestRateObj->percentage : 0;
+                
+                if ($interestRate > 0 && $financedAmount > 0) {
+                    $i = $interestRate / 100 / 12;
+                    $n = $validated['installments_count'];
+                    $monthlyPayment = $financedAmount * ($i * pow(1 + $i, $n)) / (pow(1 + $i, $n) - 1);
+                } else {
+                    $monthlyPayment = $financedAmount / $validated['installments_count'];
+                }
+            }
+        } elseif ($validated['payment_type'] === 'installments') {
+            $financedAmount = $price;
+            $validated['down_payment'] = 0;
+            
+            if ($validated['installments_count'] > 0) {
+                $interestRateObj = InterestRate::getRateForMonths($validated['installments_count']);
+                $interestRate = $interestRateObj ? $interestRateObj->percentage : 0;
+                
+                if ($interestRate > 0 && $financedAmount > 0) {
+                    $i = $interestRate / 100 / 12;
+                    $n = $validated['installments_count'];
+                    $monthlyPayment = $financedAmount * ($i * pow(1 + $i, $n)) / (pow(1 + $i, $n) - 1);
+                } else {
+                    $monthlyPayment = $financedAmount / $validated['installments_count'];
+                }
+            }
+        }
+        
+        $validated['financed_amount'] = $financedAmount;
+        $validated['interest_rate'] = $interestRate;
+        $validated['monthly_payment'] = $monthlyPayment;
 
         DB::beginTransaction();
         try {

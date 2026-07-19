@@ -62,12 +62,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cripta *</label>
-                        <select name="crypt_id" required
+                        <select name="crypt_id" id="crypt_id_edit" required
                                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('crypt_id') border-red-500 @enderror">
                             <option value="">Seleccionar cripta...</option>
                             @foreach($availableCrypts as $crypt)
-                                <option value="{{ $crypt->id }}" {{ old('crypt_id', $contract->crypt_id) == $crypt->id ? 'selected' : '' }}>
-                                    {{ $crypt->full_code }} - {{ $crypt->cryptType->name ?? 'N/A' }}
+                                <option value="{{ $crypt->id }}" {{ old('crypt_id', $contract->crypt_id) == $crypt->id ? 'selected' : '' }}
+                                        data-price="{{ $crypt->price ?? 0 }}">
+                                    {{ $crypt->full_code }} - {{ $crypt->cryptType->name ?? 'N/A' }} (Capacidad: {{ $crypt->capacity }}) - Precio: ${{ number_format($crypt->price ?? 0, 2) }}
                                 </option>
                             @endforeach
                         </select>
@@ -183,6 +184,30 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // === Actualizar precio al seleccionar cripta (EDIT) ===
+    const cryptSelectEdit = document.getElementById('crypt_id_edit');
+    const priceInputEdit = document.querySelector('input[name="price"]');
+    
+    if (cryptSelectEdit && priceInputEdit) {
+        function updatePriceEdit() {
+            const selectedOption = cryptSelectEdit.options[cryptSelectEdit.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            console.log('Precio seleccionado (edit):', price);
+            if (price && !isNaN(price) && parseFloat(price) > 0) {
+                priceInputEdit.value = parseFloat(price).toFixed(2);
+                priceInputEdit.dispatchEvent(new Event('input', { bubbles: true }));
+                priceInputEdit.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        
+        cryptSelectEdit.addEventListener('change', updatePriceEdit);
+        cryptSelectEdit.addEventListener('input', updatePriceEdit);
+        
+        if (cryptSelectEdit.value) {
+            updatePriceEdit();
+        }
+    }
+
     // === Manejo del campo de enganche para pago mixto ===
     const paymentTypeSelect = document.querySelector('select[name="payment_type"]');
     const downPaymentField = document.getElementById('down_payment_field');
@@ -198,6 +223,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 downPaymentInput.required = false;
             }
         });
+        
+        // Initial check
+        if (paymentTypeSelect.value === 'mixed') {
+            downPaymentField.style.display = 'block';
+            downPaymentInput.required = true;
+        }
     }
 
     // === Calcular fecha de vencimiento basada en mensualidades ===
