@@ -1,0 +1,5 @@
+2026/07/21-20:49:34.436 1dc8 Reusing MANIFEST C:\laragon\www\sgic-2.0\whatsapp-service\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/07/21-20:49:34.437 1dc8 Recovering log #24
+2026/07/21-20:49:34.492 1dc8 Reusing old log C:\laragon\www\sgic-2.0\whatsapp-service\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000024.log 
+2026/07/21-20:49:34.493 1dc8 Delete type=2 #23
+2026/07/21-20:49:34.493 1dc8 Delete type=2 #25

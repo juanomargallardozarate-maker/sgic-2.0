@@ -1,21 +1,22 @@
 /**
- * Servicio de WhatsApp usando whatsapp-web.js
+ * Servicio de WhatsApp usando OpenWA
  * 
  * Este microservicio expone endpoints para:
  * - Enviar códigos de verificación por WhatsApp
  * - Verificar el estado de la conexión
  * 
  * Instalación:
- * npm install
+ * npm install @open-wa/wa-automate express body-parser
  * 
  * Ejecución:
- * node index.js
+ * node whatsapp-service.js
  */
 
-const { Client, LocalAuthStrategy } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const wa = require('@open-wa/wa-automate');
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,14 +25,12 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Cliente de WhatsApp
-let client = null;
-let isReady = false;
+// Almacenamiento temporal de sesiones (en producción usar Redis o similar)
+const sessions = new Map();
 
 /**
  * Endpoint para enviar código de verificación
  * POST /send-code
- * Body: { phone: string, code: string }
  */
 app.post('/send-code', async (req, res) => {
     try {
@@ -44,7 +43,6 @@ app.post('/send-code', async (req, res) => {
             });
         }
         
-        // Validar formato del código (6 dígitos)
         if (!/^\d{6}$/.test(code)) {
             return res.status(400).json({
                 success: false,
@@ -52,7 +50,13 @@ app.post('/send-code', async (req, res) => {
             });
         }
         
-        if (!isReady) {
+        // Formatear número de teléfono (eliminar caracteres no numéricos)
+        const formattedPhone = phone.replace(/\D/g, '');
+        
+        // Obtener o crear sesión
+        let client = sessions.get('default');
+        
+        if (!client) {
             return res.status(503).json({
                 success: false,
                 message: 'WhatsApp session not initialized. Please scan QR code first.'
@@ -66,7 +70,7 @@ app.post('/send-code', async (req, res) => {
         const chatId = `${formattedPhone}@c.us`;
         
         // Verificar si el número está registrado en WhatsApp
-        const isRegistered = await client.isRegisteredUser(chatId);
+        const isRegistered = await client.isRegisteredUser(formattedPhone + '@c.us');
         
         if (!isRegistered) {
             return res.status(404).json({
@@ -75,24 +79,23 @@ app.post('/send-code', async (req, res) => {
             });
         }
         
-        // Enviar mensaje con el código
-        const message = `🔐 *Código de Verificación*\n\nTu código de verificación es: *${code}*\n\nEste código expira en 10 minutos. No lo compartas con nadie.`;
+        const messageText = `🔐 *Código de Verificación*\n\nTu código es: *${code}*\n\nExpira en 10 minutos.`;
         
-        const result = await client.sendMessage(chatId, message);
+        const result = await client.sendText(`${formattedPhone}@c.us`, message);
         
         if (result && result.id) {
             console.log(`✅ Código enviado exitosamente a ${formattedPhone}`);
             return res.json({
                 success: true,
                 message: 'Verification code sent successfully',
-                messageId: result.id._serialized
+                messageId: result.id
             });
         } else {
             throw new Error('Failed to send message');
         }
         
     } catch (error) {
-        console.error('Error sending WhatsApp message:', error);
+        console.error('Error sending message:', error);
         return res.status(500).json({
             success: false,
             message: 'Error sending WhatsApp message',
@@ -102,10 +105,12 @@ app.post('/send-code', async (req, res) => {
 });
 
 /**
- * Endpoint para verificar estado del servicio
- * GET /health
+ * Endpoint Health
  */
 app.get('/health', (req, res) => {
+    const client = sessions.get('default');
+    const isConnected = client ? true : false;
+    
     res.json({
         success: true,
         status: 'running',
@@ -120,6 +125,8 @@ app.get('/health', (req, res) => {
  */
 app.get('/session-status', async (req, res) => {
     try {
+        const client = sessions.get('default');
+        
         if (!client) {
             return res.json({
                 success: false,
@@ -128,11 +135,12 @@ app.get('/session-status', async (req, res) => {
             });
         }
         
+        const isLogged = await client.isLoggedIn();
         const state = await client.getState();
         
         res.json({
             success: true,
-            authenticated: state === 'CONNECTED',
+            authenticated: isLogged,
             state: state,
             timestamp: new Date().toISOString()
         });
@@ -151,44 +159,40 @@ async function initWhatsApp() {
     console.log('🔄 Initializing WhatsApp session...');
     
     try {
-        client = new Client({
-            authStrategy: new LocalAuthStrategy(),
-            puppeteer: {
-                headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--disable-gpu'
-                ]
+        const client = await wa.create({
+            sessionId: 'default',
+            multiDevice: true,
+            authTimeout: 60000,
+            cacheEnabled: false,
+            useChrome: true,
+            killProcessOnBrowserClose: true,
+            throwErrorOnTosBlock: false,
+            chromiumArgs: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--aggressive-cache-discard',
+                '--disable-cache',
+                '--disable-application-cache',
+                '--disable-offline-load-stale-cache',
+                '--disk-cache-size=0'
+            ]
+        });
+        
+        client.onStateChanged(async (state) => {
+            console.log('📱 State changed:', state);
+            
+            if (state === 'CONFLICT' || state === 'UNLAUNCHED') {
+                console.log('⚠️ Session conflict, restarting...');
+                client.forceRefocus();
             }
         });
-
-        client.on('qr', (qr) => {
-            console.log('\n📱 Escanea el código QR con WhatsApp:\n');
-            qrcode.generate(qr, { small: true });
-            console.log('\n');
+        
+        client.onAnyMessage(async (message) => {
+            console.log('💬 Message received from:', message.from);
         });
-
-        client.on('ready', () => {
-            console.log('✅ ¡Cliente de WhatsApp listo y conectado!');
-            isReady = true;
-        });
-
-        client.on('disconnected', (reason) => {
-            console.log('⚠️ Cliente desconectado:', reason);
-            isReady = false;
-        });
-
-        client.on('message', async (message) => {
-            console.log(`💬 Mensaje recibido de ${message.from}:`);
-            console.log(`   Contenido: ${message.body}`);
-        });
-
-        await client.initialize();
+        
+        sessions.set('default', client);
+        console.log('✅ WhatsApp session initialized successfully');
         
     } catch (error) {
         console.error('❌ Error initializing WhatsApp:', error);
@@ -199,33 +203,24 @@ async function initWhatsApp() {
 /**
  * Iniciar servidor
  */
-async function startServer() {
-    await initWhatsApp();
-    
-    app.listen(port, '0.0.0.0', () => {
-        console.log(`🚀 WhatsApp Service running on http://localhost:${port}`);
-        console.log(`   Endpoints:`);
-        console.log(`   - POST /send-code`);
-        console.log(`   - GET /health`);
-        console.log(`   - GET /session-status`);
-    });
-}
+app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Servicio WhatsApp corriendo en http://localhost:${port}`);
+    console.log(`   - POST /send-code`);
+    console.log(`   - GET /health`);
+});
 
-// Manejar cierre graceful
+// Cierre graceful
 process.on('SIGINT', async () => {
     console.log('\n🛑 Shutting down...');
     
-    if (client) {
+    for (const [sessionId, client] of sessions.entries()) {
         try {
-            await client.destroy();
-            console.log('✅ Session closed');
+            await client.close();
+            console.log(`✅ Session ${sessionId} closed`);
         } catch (error) {
-            console.error('❌ Error closing session:', error);
+            console.error(`❌ Error closing session ${sessionId}:`, error);
         }
     }
     
     process.exit(0);
 });
-
-// Iniciar
-startServer().catch(console.error);

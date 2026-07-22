@@ -1,6 +1,7 @@
 ```
 # Dependencies
 node_modules/
+<<<<<<< HEAD
 
 # Environment
 .env
@@ -18,3 +19,14 @@ node_modules/
 # Process manager
 pm2.log
 ```
+=======
+.session/
+*.session/
+session.data.json
+
+# managed
+**.data.json
+**.node-persist**
+**_IGNORE_**
+# end managed
+>>>>>>> ec239a9 (Actualización a whatsapp-web.js y configuración PM2)
