@@ -1,18 +1,19 @@
 /**
- * Servicio de WhatsApp usando OpenWA
+ * Servicio de WhatsApp usando whatsapp-web.js
  * 
  * Este microservicio expone endpoints para:
  * - Enviar códigos de verificación por WhatsApp
  * - Verificar el estado de la conexión
  * 
  * Instalación:
- * npm install @open-wa/wa-automate express body-parser
+ * npm install
  * 
  * Ejecución:
- * node whatsapp-service.js
+ * node index.js
  */
 
-const wa = require('@open-wa/wa-automate');
+const { Client, LocalAuthStrategy } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -23,8 +24,9 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Almacenamiento temporal de sesiones (en producción usar Redis o similar)
-const sessions = new Map();
+// Cliente de WhatsApp
+let client = null;
+let isReady = false;
 
 /**
  * Endpoint para enviar código de verificación
@@ -50,21 +52,21 @@ app.post('/send-code', async (req, res) => {
             });
         }
         
-        // Formatear número de teléfono (eliminar caracteres no numéricos)
-        const formattedPhone = phone.replace(/\D/g, '');
-        
-        // Obtener o crear sesión
-        let client = sessions.get('default');
-        
-        if (!client) {
+        if (!isReady) {
             return res.status(503).json({
                 success: false,
                 message: 'WhatsApp session not initialized. Please scan QR code first.'
             });
         }
         
+        // Formatear número de teléfono (eliminar caracteres no numéricos)
+        const formattedPhone = phone.replace(/\D/g, '');
+        
+        // Obtener ID de chat
+        const chatId = `${formattedPhone}@c.us`;
+        
         // Verificar si el número está registrado en WhatsApp
-        const isRegistered = await client.isRegisteredUser(formattedPhone + '@c.us');
+        const isRegistered = await client.isRegisteredUser(chatId);
         
         if (!isRegistered) {
             return res.status(404).json({
@@ -76,14 +78,14 @@ app.post('/send-code', async (req, res) => {
         // Enviar mensaje con el código
         const message = `🔐 *Código de Verificación*\n\nTu código de verificación es: *${code}*\n\nEste código expira en 10 minutos. No lo compartas con nadie.`;
         
-        const result = await client.sendText(`${formattedPhone}@c.us`, message);
+        const result = await client.sendMessage(chatId, message);
         
         if (result && result.id) {
             console.log(`✅ Código enviado exitosamente a ${formattedPhone}`);
             return res.json({
                 success: true,
                 message: 'Verification code sent successfully',
-                messageId: result.id
+                messageId: result.id._serialized
             });
         } else {
             throw new Error('Failed to send message');
@@ -104,13 +106,10 @@ app.post('/send-code', async (req, res) => {
  * GET /health
  */
 app.get('/health', (req, res) => {
-    const client = sessions.get('default');
-    const isConnected = client ? true : false;
-    
     res.json({
         success: true,
         status: 'running',
-        whatsapp_connected: isConnected,
+        whatsapp_connected: isReady,
         timestamp: new Date().toISOString()
     });
 });
@@ -121,8 +120,6 @@ app.get('/health', (req, res) => {
  */
 app.get('/session-status', async (req, res) => {
     try {
-        const client = sessions.get('default');
-        
         if (!client) {
             return res.json({
                 success: false,
@@ -131,12 +128,11 @@ app.get('/session-status', async (req, res) => {
             });
         }
         
-        const isLogged = await client.isLoggedIn();
         const state = await client.getState();
         
         res.json({
             success: true,
-            authenticated: isLogged,
+            authenticated: state === 'CONNECTED',
             state: state,
             timestamp: new Date().toISOString()
         });
@@ -155,40 +151,44 @@ async function initWhatsApp() {
     console.log('🔄 Initializing WhatsApp session...');
     
     try {
-        const client = await wa.create({
-            sessionId: 'default',
-            multiDevice: true,
-            authTimeout: 60000,
-            cacheEnabled: false,
-            useChrome: true,
-            killProcessOnBrowserClose: true,
-            throwErrorOnTosBlock: false,
-            chromiumArgs: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--aggressive-cache-discard',
-                '--disable-cache',
-                '--disable-application-cache',
-                '--disable-offline-load-stale-cache',
-                '--disk-cache-size=0'
-            ]
-        });
-        
-        client.onStateChanged(async (state) => {
-            console.log('📱 State changed:', state);
-            
-            if (state === 'CONFLICT' || state === 'UNLAUNCHED') {
-                console.log('⚠️ Session conflict, restarting...');
-                client.forceRefocus();
+        client = new Client({
+            authStrategy: new LocalAuthStrategy(),
+            puppeteer: {
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--disable-gpu'
+                ]
             }
         });
-        
-        client.onAnyMessage(async (message) => {
-            console.log('💬 Message received from:', message.from);
+
+        client.on('qr', (qr) => {
+            console.log('\n📱 Escanea el código QR con WhatsApp:\n');
+            qrcode.generate(qr, { small: true });
+            console.log('\n');
         });
-        
-        sessions.set('default', client);
-        console.log('✅ WhatsApp session initialized successfully');
+
+        client.on('ready', () => {
+            console.log('✅ ¡Cliente de WhatsApp listo y conectado!');
+            isReady = true;
+        });
+
+        client.on('disconnected', (reason) => {
+            console.log('⚠️ Cliente desconectado:', reason);
+            isReady = false;
+        });
+
+        client.on('message', async (message) => {
+            console.log(`💬 Mensaje recibido de ${message.from}:`);
+            console.log(`   Contenido: ${message.body}`);
+        });
+
+        await client.initialize();
         
     } catch (error) {
         console.error('❌ Error initializing WhatsApp:', error);
@@ -215,12 +215,12 @@ async function startServer() {
 process.on('SIGINT', async () => {
     console.log('\n🛑 Shutting down...');
     
-    for (const [sessionId, client] of sessions.entries()) {
+    if (client) {
         try {
-            await client.close();
-            console.log(`✅ Session ${sessionId} closed`);
+            await client.destroy();
+            console.log('✅ Session closed');
         } catch (error) {
-            console.error(`❌ Error closing session ${sessionId}:`, error);
+            console.error('❌ Error closing session:', error);
         }
     }
     

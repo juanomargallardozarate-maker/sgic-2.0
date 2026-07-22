@@ -1,14 +1,16 @@
 {
   "name": "whatsapp-service",
   "version": "1.0.0",
-  "description": "Microservicio de WhatsApp para envío de códigos de verificación usando OpenWA",
+  "description": "Microservicio de WhatsApp para envío de códigos de verificación usando whatsapp-web.js",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "prod": "pm2 start index.js --name whatsapp-service"
   },
   "dependencies": {
-    "@open-wa/wa-automate": "^4.72.3",
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0",
     "body-parser": "^1.20.2",
     "express": "^4.18.2"
   },
