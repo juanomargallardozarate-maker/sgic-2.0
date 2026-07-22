@@ -1,6 +1,20 @@
-*.sqlite*
-# OpenWA y Node
+```
+# Dependencies
 node_modules/
-.session/
-*.session/
-session.data.json
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
+.idea/
+
+# Process manager
+pm2.log
+```
