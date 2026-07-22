@@ -34,12 +34,18 @@ class Customer extends Model
         'heir_declaration_url',
         'notes',
         'is_active',
+        // Campos de verificación WhatsApp
+        'whatsapp_verification_code',
+        'phone_verified',
+        'whatsapp_verified_at',
     ];
 
     protected $casts = [
         'is_deceased' => 'boolean',
         'deceased_at' => 'date',
         'is_active' => 'boolean',
+        'phone_verified' => 'boolean',
+        'whatsapp_verified_at' => 'datetime',
     ];
 
     protected $appends = [
@@ -118,5 +124,57 @@ class Customer extends Model
     public function heirs(): HasMany
     {
         return $this->hasMany(Heir::class);
+    }
+
+    /**
+     * Verificar si el cliente tiene el teléfono verificado
+     */
+    public function isPhoneVerified(): bool
+    {
+        return $this->phone_verified && $this->whatsapp_verified_at !== null;
+    }
+
+    /**
+     * Generar y guardar código de verificación
+     */
+    public function generateVerificationCode(): string
+    {
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
+        $this->update([
+            'whatsapp_verification_code' => $code,
+        ]);
+
+        return $code;
+    }
+
+    /**
+     * Validar código de verificación
+     */
+    public function verifyCode(string $code): bool
+    {
+        if ($this->whatsapp_verification_code !== $code) {
+            return false;
+        }
+
+        $this->update([
+            'phone_verified' => true,
+            'whatsapp_verified_at' => now(),
+            'whatsapp_verification_code' => null,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Marcar teléfono como no verificado
+     */
+    public function markPhoneAsUnverified(): void
+    {
+        $this->update([
+            'phone_verified' => false,
+            'whatsapp_verified_at' => null,
+            'whatsapp_verification_code' => null,
+        ]);
     }
 }
