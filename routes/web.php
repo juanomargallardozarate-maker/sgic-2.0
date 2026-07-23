@@ -140,6 +140,10 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
                 Route::post('contracts/{contract}/succession/start', [\App\Http\Controllers\Commercial\ContractController::class, 'startSuccession'])->name('contracts.succession.start');
                 Route::post('contracts/{contract}/succession/complete', [\App\Http\Controllers\Commercial\ContractController::class, 'completeSuccession'])->name('contracts.succession.complete');
                 Route::get('contracts/export', [\App\Http\Controllers\Commercial\ContractController::class, 'export'])->name('contracts.export');
+                
+                // Verificación WhatsApp para clientes
+                Route::post('contracts/send-verification-code', [\App\Http\Controllers\Commercial\ContractController::class, 'sendVerificationCode'])->name('contracts.send-verification-code');
+                Route::post('contracts/verify-code', [\App\Http\Controllers\Commercial\ContractController::class, 'verifyCode'])->name('contracts.verify-code');
             });
 
             // ==========================================

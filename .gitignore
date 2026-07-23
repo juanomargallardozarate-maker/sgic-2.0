@@ -1,39 +1,44 @@
-```
-# Laravel-specific ignores
+```gitignore
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
 vendor/
-storage/
-bootstrap/cache/
-public/storage
+node_modules/
 .env
+.env.local
 .env.*
-!.env.example
 
-# Database migrations (keep the migration files themselves)
-# But ignore any backup or temporary migration files
-*_backup.sql
-*_temp.sql
-*.sql.bak
-
-# PHP specific
-*.php~
-*.swp
-.php_cs.cache
-
-# Logs
+# Logs and temp files
 *.log
-storage/logs/
+*.tmp
+*.swp
+*.swo
 
-# IDE
+# Editors
 .vscode/
 .idea/
-*.swo
-*.swp
 
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Tests
-.phpunit.result.cache
+# Coverage reports
 coverage/
+htmlcov/
+.coverage
+
+# Build directories
+dist/
+build/
+target/
 ```

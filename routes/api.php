@@ -2,12 +2,25 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Customer;
 
-// Rutas API básicas (se irán agregando según el SDD §7.6 y §8)
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
 
-// Nota: Las rutas completas de API se agregarán según el desarrollo
-// - Sync PWA: /api/v1/sync/download, /api/v1/sync/upload
-// - Webhooks: /api/webhooks/mercadopago, /api/webhooks/stripe, etc.
+// Endpoint público para verificar estado del teléfono de un cliente
+Route::get('/customers/{id}/phone-status', function($id) {
+    $customer = Customer::find($id);
+    
+    if (!$customer) {
+        return response()->json(['error' => 'Cliente no encontrado'], 404);
+    }
+    
+    return response()->json([
+        'has_phone' => !empty($customer->phone),
+        'phone' => $customer->phone,
+        'is_verified' => $customer->isPhoneVerified(),
+    ]);
+});
