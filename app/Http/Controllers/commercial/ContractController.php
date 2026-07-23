@@ -393,7 +393,7 @@ class ContractController extends Controller
                 'price' => $contract->price,
             ]);
 
-            return redirect()->route('commercial.contracts.show', $contract)
+            return redirect()->route('inventory.commercial.contracts.show', $contract)
                 ->with('success', 'Contrato creado exitosamente. Folio: ' . $contract->contract_number);
 
         } catch (\Exception $e) {
@@ -545,7 +545,7 @@ class ContractController extends Controller
 
             DB::commit();
 
-            return redirect()->route('commercial.contracts.show', $contract)
+            return redirect()->route('inventory.commercial.contracts.show', $contract)
                 ->with('success', 'Contrato actualizado exitosamente.');
 
         } catch (\Exception $e) {
@@ -627,7 +627,7 @@ class ContractController extends Controller
 
             DB::commit();
 
-            return redirect()->route('commercial.contracts.show', $renewedContract)
+            return redirect()->route('inventory.commercial.contracts.show', $renewedContract)
                 ->with('success', 'Contrato renovado exitosamente. Nuevo folio: ' . $renewedContract->contract_number);
 
         } catch (\Exception $e) {

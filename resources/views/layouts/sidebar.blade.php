@@ -142,13 +142,13 @@
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <div class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Comercial</div>
                 
-                <a href="{{ route('commercial.customers.index') }}" 
+                <a href="{{ route('inventory.commercial.customers.index') }}" 
                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('commercial.customers.*') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
                     <i class="fa-solid fa-users mr-3 text-lg w-6 text-center {{ request()->routeIs('commercial.customers.*') ? 'text-white' : 'group-hover:text-white' }}"></i>
                     <span>Clientes</span>
                 </a>
                 
-                <a href="{{ route('commercial.contracts.index') }}" 
+                <a href="{{ route('inventory.commercial.contracts.index') }}" 
                    class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('commercial.contracts.*') ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors' }}">
                     <i class="fa-solid fa-file-contract mr-3 text-lg w-6 text-center {{ request()->routeIs('commercial.contracts.*') ? 'text-white' : 'group-hover:text-white' }}"></i>
                     <span>Contratos</span>

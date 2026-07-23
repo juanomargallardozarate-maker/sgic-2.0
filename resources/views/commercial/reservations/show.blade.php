@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <a href="{{ route('commercial.reservations.index') }}" 
+            <a href="{{ route('inventory.commercial.reservations.index') }}" 
                class="text-blue-600 hover:text-blue-900 flex items-center gap-2 mb-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -141,7 +141,7 @@
                 <div class="bg-green-50 border border-green-200 rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-green-800 mb-2">✅ Contrato Asociado</h2>
                     <p class="text-green-700 mb-4">Esta reserva fue convertida exitosamente a contrato.</p>
-                    <a href="{{ route('commercial.contracts.show', $reservation->contract) }}" 
+                    <a href="{{ route('inventory.commercial.contracts.show', $reservation->contract) }}" 
                        class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                         Ver Contrato #{{ $reservation->contract->contract_number }}
                     </a>
@@ -223,7 +223,7 @@
     <div id="extendModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 class="text-lg font-semibold mb-4">Extender Reserva</h3>
-            <form action="{{ route('commercial.reservations.extend', $reservation) }}" method="POST">
+            <form action="{{ route('inventory.commercial.reservations.extend', $reservation) }}" method="POST">
                 @csrf
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Horas adicionales</label>
@@ -248,7 +248,7 @@
     <div id="convertModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-semibold mb-4">Convertir Reserva a Contrato</h3>
-            <form action="{{ route('commercial.reservations.convert', $reservation) }}" method="POST">
+            <form action="{{ route('inventory.commercial.reservations.convert', $reservation) }}" method="POST">
                 @csrf
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
@@ -315,7 +315,7 @@
     <div id="cancelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 class="text-lg font-semibold mb-4">Cancelar Reserva</h3>
-            <form action="{{ route('commercial.reservations.cancel', $reservation) }}" method="POST">
+            <form action="{{ route('inventory.commercial.reservations.cancel', $reservation) }}" method="POST">
                 @csrf
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Motivo (opcional)</label>

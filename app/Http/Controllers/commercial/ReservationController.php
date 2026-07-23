@@ -132,7 +132,7 @@ class ReservationController extends Controller
 
             DB::commit();
 
-            return redirect()->route('commercial.reservations.show', $reservation)
+            return redirect()->route('inventory.commercial.reservations.show', $reservation)
                 ->with('success', "Reserva creada exitosamente. Expira en {$expirationHours} horas.");
 
         } catch (\Exception $e) {
@@ -248,7 +248,7 @@ class ReservationController extends Controller
         try {
             $contract = $reservation->convertToContract($validated);
 
-            return redirect()->route('commercial.contracts.show', $contract)
+            return redirect()->route('inventory.commercial.contracts.show', $contract)
                 ->with('success', "Reserva convertida a contrato exitosamente. Folio: {$contract->contract_number}");
 
         } catch (\Exception $e) {

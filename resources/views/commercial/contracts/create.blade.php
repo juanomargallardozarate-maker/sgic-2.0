@@ -7,7 +7,7 @@
     <div class="max-w-4xl mx-auto">
         {{-- Header --}}
         <div class="mb-6">
-            <a href="{{ route('commercial.contracts.index') }}" class="text-emerald-600 hover:text-emerald-900 mb-2 inline-block">
+            <a href="{{ route('inventory.commercial.contracts.index') }}" class="text-emerald-600 hover:text-emerald-900 mb-2 inline-block">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Contratos
             </a>
             <h1 class="text-2xl font-bold text-gray-900">Crear Nuevo Contrato</h1>
@@ -15,7 +15,7 @@
         </div>
 
         {{-- Form --}}
-        <form method="POST" action="{{ route('commercial.contracts.store') }}" class="bg-white rounded-lg shadow p-6">
+        <form method="POST" action="{{ route('inventory.commercial.contracts.store') }}" class="bg-white rounded-lg shadow p-6">
             @csrf
 
             {{-- Datos del Cliente --}}
@@ -257,7 +257,7 @@
 
             {{-- Actions --}}
             <div class="flex justify-end gap-3 pt-4 border-t">
-                <a href="{{ route('commercial.contracts.index') }}" 
+                <a href="{{ route('inventory.commercial.contracts.index') }}" 
                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
                     Cancelar
                 </a>
@@ -571,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnSendCode.disabled = true;
             verificationMessage.textContent = '';
 
-            fetch('{{ route("commercial.contracts.send-verification-code") }}', {
+            fetch('{{ route("inventory.commercial.contracts.send-verification-code") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -619,7 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingSpinner.classList.remove('hidden');
             verificationMessage.textContent = '';
 
-            fetch('{{ route("commercial.contracts.verify-code") }}', {
+            fetch('{{ route("inventory.commercial.contracts.verify-code") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
