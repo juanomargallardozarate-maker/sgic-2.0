@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Commercial;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Commercial\StoreContractRequest;
 use App\Models\Contract;
 use App\Models\Customer;
 use App\Models\Crypt;
 use App\Models\ContractType;
-use App\Models\Beneficiary;
-use App\Models\Heir;
 use App\Models\GlobalSetting;
 use App\Models\InterestRate;
 use App\Services\WhatsAppService;
+use App\Services\Commercial\ContractService;
+use App\Actions\Contract\CreateContractAction;
+use App\Http\Resources\Commercial\ContractResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,59 +21,36 @@ use Illuminate\Support\Str;
 
 class ContractController extends Controller
 {
+    public function __construct(
+        private ContractService $contractService,
+        private CreateContractAction $createContractAction
+    ) {}
+    
     /**
      * Display a listing of contracts.
      * US-3.2: Emisión de contratos perpetuos y temporales (RN-02)
      */
     public function index(Request $request)
     {
-        $query = Contract::with(['customer', 'crypt', 'contractType'])
-            ->orderBy('created_at', 'desc');
-
-        // Filtros
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('contract_type_id')) {
-            $query->where('contract_type_id', $request->contract_type_id);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('contract_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('crypt', fn($q) => $q->where('code', 'like', "%{$search}%"));
-            });
-        }
-
-        // Contratos por vencer (próximos 90 días)
-        $expiringSoon = Contract::active()
-            ->expiringSoon(90)
-            ->count();
-
-        // Contratos en periodo de gracia
-        $inGracePeriod = Contract::inGracePeriod()->count();
-
-        // Contratos en proceso de decadencia
-        $decaying = Contract::where('status', 'decaying')->count();
-
-        $contracts = $query->paginate(15)->withQueryString();
+        $filters = [
+            'status' => $request->status,
+            'contract_type_id' => $request->contract_type_id,
+            'search' => $request->search,
+        ];
+        
+        $contracts = $this->contractService->getContracts($filters);
+        $metrics = $this->contractService->getContractMetrics();
+        
         $contractTypes = ContractType::all();
-        $customers = Customer::where('is_active', true)->get();
-        $availableCrypts = Crypt::whereHas('cryptStatus', fn($q) => $q->where('code', 'available'))
-            ->where('is_blocked', false)
-            ->get();
+        $customers = $this->contractService->getActiveCustomers();
+        $availableCrypts = $this->contractService->getAvailableCrypts();
 
         return view('commercial.contracts.index', compact(
             'contracts',
             'contractTypes',
             'customers',
             'availableCrypts',
-            'expiringSoon',
-            'inGracePeriod',
-            'decaying'
+            'metrics'
         ));
     }
 
