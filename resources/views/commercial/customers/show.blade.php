@@ -72,7 +72,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Encabezado -->
             <div class="mb-6">
-                <a href="{{ route('inventory.commercial.customers.index') }}" 
+                <a href="{{ route('commercial.customers.index') }}" 
                    class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 mb-3">
                     <i class="fa-solid fa-arrow-left mr-2"></i>
                     Volver al listado
@@ -107,7 +107,7 @@
                     </div>
                     <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
                         @if(!$customer->is_deceased)
-                            <a href="{{ route('inventory.commercial.customers.edit', $customer) }}" 
+                            <a href="{{ route('commercial.customers.edit', $customer) }}" 
                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <i class="fa-solid fa-pen-to-square mr-2"></i>
                                 Editar
@@ -120,7 +120,7 @@
                                 Desactivar
                             </button>
                             <form id="deactivate-form" 
-                                  action="{{ route('inventory.commercial.customers.deactivate', $customer) }}" 
+                                  action="{{ route('commercial.customers.deactivate', $customer) }}" 
                                   method="POST" 
                                   class="hidden">
                                 @csrf
@@ -134,7 +134,7 @@
                                 Reactivar
                             </button>
                             <form id="reactivate-form" 
-                                  action="{{ route('inventory.commercial.customers.reactivate', $customer) }}" 
+                                  action="{{ route('commercial.customers.reactivate', $customer) }}" 
                                   method="POST" 
                                   class="hidden">
                                 @csrf
@@ -334,7 +334,7 @@
                                                     <p class="text-sm font-bold text-slate-900 mt-2">
                                                         ${{ number_format($contract->price, 2) }}
                                                     </p>
-                                                    <a href="{{ route('inventory.commercial.contracts.show', $contract) }}" 
+                                                    <a href="{{ route('commercial.contracts.show', $contract) }}" 
                                                        class="text-xs text-emerald-600 hover:text-emerald-900 mt-2 inline-block">
                                                         Ver detalle <i class="fa-solid fa-arrow-right ml-1"></i>
                                                     </a>
@@ -395,7 +395,7 @@
                                                 </div>
                                             </div>
                                             <form id="remove-beneficiary-form-{{ $beneficiary->id }}" 
-                                                  action="{{ route('inventory.commercial.customers.beneficiaries.remove', [$customer, $beneficiary]) }}" 
+                                                  action="{{ route('commercial.customers.beneficiaries.remove', [$customer, $beneficiary]) }}" 
                                                   method="POST" 
                                                   class="hidden">
                                                 @csrf
@@ -528,7 +528,7 @@
          aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form action="{{ route('inventory.commercial.customers.mark-as-deceased', $customer) }}" method="POST">
+                <form action="{{ route('commercial.customers.mark-as-deceased', $customer) }}" method="POST">
                     @csrf
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
@@ -602,7 +602,7 @@
          aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form action="{{ route('inventory.commercial.customers.beneficiaries.add', $customer) }}" method="POST">
+                <form action="{{ route('commercial.customers.beneficiaries.add', $customer) }}" method="POST">
                     @csrf
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
