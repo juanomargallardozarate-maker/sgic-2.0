@@ -147,7 +147,7 @@ class CustomerController extends Controller
 
             DB::commit();
 
-            return redirect()->route('inventory.commercial.customers.index')
+            return redirect()->route('commercial.customers.index')
                 ->with('success', 'Cliente registrado exitosamente.');
 
         } catch (\Exception $e) {

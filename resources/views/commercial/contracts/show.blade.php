@@ -7,7 +7,7 @@
     <div class="max-w-6xl mx-auto">
         {{-- Header --}}
         <div class="mb-6">
-            <a href="{{ route('inventory.commercial.contracts.index') }}" class="text-emerald-600 hover:text-emerald-900 mb-2 inline-block">
+            <a href="{{ route('commercial.contracts.index') }}" class="text-emerald-600 hover:text-emerald-900 mb-2 inline-block">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Contratos
             </a>
             <div class="flex justify-between items-center">
@@ -222,14 +222,14 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Acciones</h3>
                     <div class="space-y-2">
                         @if($contract->status === 'draft')
-                            <form method="POST" action="{{ route('inventory.commercial.contracts.sign', $contract) }}" class="mb-2">
+                            <form method="POST" action="{{ route('commercial.contracts.sign', $contract) }}" class="mb-2">
                                 @csrf
                                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
                                     <i class="fa-solid fa-signature mr-2"></i>
                                     Firmar Contrato
                                 </button>
                             </form>
-                            <a href="{{ route('inventory.commercial.contracts.edit', $contract) }}" 
+                            <a href="{{ route('commercial.contracts.edit', $contract) }}" 
                                class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors text-center">
                                 <i class="fa-solid fa-pen mr-2"></i>
                                 Editar Contrato
@@ -286,7 +286,7 @@
 <div id="renewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold mb-4">Renovar Contrato</h3>
-        <form method="POST" action="{{ route('inventory.commercial.contracts.renew', $contract) }}">
+        <form method="POST" action="{{ route('commercial.contracts.renew', $contract) }}">
             @csrf
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nueva Fecha de Vencimiento *</label>
@@ -315,7 +315,7 @@
 <div id="successionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold mb-4">Iniciar Proceso de Sucesión</h3>
-        <form method="POST" action="{{ route('inventory.commercial.contracts.succession.start', $contract) }}">
+        <form method="POST" action="{{ route('commercial.contracts.succession.start', $contract) }}">
             @csrf
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">URL del Documento Legal *</label>
@@ -340,7 +340,7 @@
 <div id="completeSuccessionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold mb-4">Completar Sucesión</h3>
-        <form method="POST" action="{{ route('inventory.commercial.contracts.succession.complete', $contract) }}">
+        <form method="POST" action="{{ route('commercial.contracts.succession.complete', $contract) }}">
             @csrf
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nuevo Titular *</label>
