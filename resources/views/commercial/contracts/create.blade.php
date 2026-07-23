@@ -571,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnSendCode.disabled = true;
             verificationMessage.textContent = '';
 
-            fetch('{{ route("commercial.contracts.send-verification-code") }}', {
+            fetch('{{ route("inventory.commercial.contracts.send-verification-code") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -619,7 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingSpinner.classList.remove('hidden');
             verificationMessage.textContent = '';
 
-            fetch('{{ route("commercial.contracts.verify-code") }}', {
+            fetch('{{ route("inventory.commercial.contracts.verify-code") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
