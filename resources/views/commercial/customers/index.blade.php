@@ -16,12 +16,12 @@
                     </p>
                 </div>
                 <div class="mt-4 flex md:mt-0 md:ml-4 space-x-3">
-                    <a href="{{ route('commercial.customers.export') }}" 
+                    <a href="{{ route('inventory.commercial.customers.export') }}" 
                        class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                         <i class="fa-solid fa-file-export mr-2"></i>
                         Exportar
                     </a>
-                    <a href="{{ route('commercial.customers.create') }}" 
+                    <a href="{{ route('inventory.commercial.customers.create') }}" 
                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                         <i class="fa-solid fa-plus mr-2"></i>
                         Nuevo Cliente
@@ -110,7 +110,7 @@
 
             <!-- Filtros y Búsqueda -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
-                <form method="GET" action="{{ route('commercial.customers.index') }}" class="p-6">
+                <form method="GET" action="{{ route('inventory.commercial.customers.index') }}" class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <!-- Búsqueda -->
                         <div>
@@ -151,7 +151,7 @@
                                 <i class="fa-solid fa-filter mr-2"></i>
                                 Filtrar
                             </button>
-                            <a href="{{ route('commercial.customers.index') }}" 
+                            <a href="{{ route('inventory.commercial.customers.index') }}" 
                                class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </a>
@@ -288,12 +288,12 @@
                                         <!-- Acciones -->
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end space-x-2">
-                                                <a href="{{ route('commercial.customers.show', $customer) }}" 
+                                                <a href="{{ route('inventory.commercial.customers.show', $customer) }}" 
                                                    class="text-emerald-600 hover:text-emerald-900" 
                                                    title="Ver detalle">
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('commercial.customers.edit', $customer) }}" 
+                                                <a href="{{ route('inventory.commercial.customers.edit', $customer) }}" 
                                                    class="text-blue-600 hover:text-blue-900" 
                                                    title="Editar">
                                                     <i class="fa-solid fa-pen-to-square"></i>
@@ -305,7 +305,7 @@
                                                         <i class="fa-solid fa-user-slash"></i>
                                                     </button>
                                                     <form id="deactivate-form-{{ $customer->id }}" 
-                                                          action="{{ route('commercial.customers.deactivate', $customer) }}" 
+                                                          action="{{ route('inventory.commercial.customers.deactivate', $customer) }}" 
                                                           method="POST" 
                                                           class="hidden">
                                                         @csrf
@@ -319,7 +319,7 @@
                                                         <i class="fa-solid fa-user-check"></i>
                                                     </button>
                                                     <form id="reactivate-form-{{ $customer->id }}" 
-                                                          action="{{ route('commercial.customers.reactivate', $customer) }}" 
+                                                          action="{{ route('inventory.commercial.customers.reactivate', $customer) }}" 
                                                           method="POST" 
                                                           class="hidden">
                                                         @csrf
@@ -349,7 +349,7 @@
                             @endif
                         </p>
                         @if(!request()->hasAny(['search', 'type', 'status']))
-                            <a href="{{ route('commercial.customers.create') }}" 
+                            <a href="{{ route('inventory.commercial.customers.create') }}" 
                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700">
                                 <i class="fa-solid fa-plus mr-2"></i>
                                 Registrar Cliente

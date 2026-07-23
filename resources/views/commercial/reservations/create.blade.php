@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-8 max-w-3xl">
     <!-- Header -->
     <div class="mb-6">
-        <a href="{{ route('commercial.reservations.index') }}" 
+        <a href="{{ route('inventory.commercial.reservations.index') }}" 
            class="text-blue-600 hover:text-blue-900 flex items-center gap-2 mb-4">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -29,7 +29,7 @@
     @endif
 
     <!-- Form -->
-    <form action="{{ route('commercial.reservations.store') }}" method="POST" class="bg-white rounded-lg shadow p-6">
+    <form action="{{ route('inventory.commercial.reservations.store') }}" method="POST" class="bg-white rounded-lg shadow p-6">
         @csrf
 
         <!-- Cliente -->
@@ -118,7 +118,7 @@
                     class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                 Crear Reserva
             </button>
-            <a href="{{ route('commercial.reservations.index') }}" 
+            <a href="{{ route('inventory.commercial.reservations.index') }}" 
                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-center">
                 Cancelar
             </a>
