@@ -36,6 +36,9 @@
                         @error('customer_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        @error('phone_verified')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Contrato *</label>
@@ -51,6 +54,66 @@
                         @error('contract_type_id')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+                </div>
+
+                {{-- Verificación de Teléfono vía WhatsApp --}}
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fa-brands fa-whatsapp text-blue-500 text-xl"></i>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h4 class="text-sm font-medium text-blue-800">Verificación de Teléfono</h4>
+                            <p class="text-xs text-blue-700 mt-1">
+                                Es necesario verificar el teléfono del cliente antes de crear el contrato. El cliente recibirá un código de 6 dígitos por WhatsApp.
+                            </p>
+                            
+                            <div id="verification-section" class="mt-3 hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div class="md:col-span-2">
+                                        <p class="text-xs text-gray-600 mb-1">
+                                            <strong>Teléfono:</strong> <span id="customer-phone"></span>
+                                            <span id="verified-badge" class="hidden ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                                <i class="fa-solid fa-check-circle"></i> Verificado
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button" id="btn-send-code" class="px-3 py-2 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition">
+                                        <i class="fa-solid fa-paper-plane mr-1"></i> Enviar Código
+                                    </button>
+                                    
+                                    <div id="code-input-section" class="hidden flex items-center gap-2">
+                                        <input type="text" id="verification-code" maxlength="6" 
+                                               placeholder="Código de 6 dígitos"
+                                               class="w-32 border-gray-300 rounded-md shadow-sm text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                                        <button type="button" id="btn-verify-code" class="px-3 py-2 bg-green-600 text-white text-xs rounded-md hover:bg-green-700 transition">
+                                            <i class="fa-solid fa-check mr-1"></i> Verificar
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="loading-spinner" class="hidden">
+                                        <i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i>
+                                        <span class="text-xs text-gray-600 ml-1">Enviando...</span>
+                                    </div>
+                                    
+                                    <div id="verification-message" class="text-xs mt-1"></div>
+                                </div>
+                                
+                                <input type="hidden" id="is-phone-verified" name="is_phone_verified" value="0">
+                            </div>
+                            
+                            <div id="no-phone-message" class="hidden mt-2 text-xs text-orange-600">
+                                <i class="fa-solid fa-exclamation-triangle"></i> El cliente seleccionado no tiene un número de teléfono registrado.
+                            </div>
+                            
+                            <div id="already-verified-message" class="hidden mt-2 text-xs text-green-600">
+                                <i class="fa-solid fa-check-circle"></i> El teléfono de este cliente ya está verificado.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -424,6 +487,176 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 endDateInput.value = `${year}-${month}-${day}`;
             }
+        });
+    }
+
+    // === VERIFICACIÓN DE TELÉFONO VÍA WHATSAPP ===
+    const customerSelect = document.getElementById('customer_id');
+    const verificationSection = document.getElementById('verification-section');
+    const noPhoneMessage = document.getElementById('no-phone-message');
+    const alreadyVerifiedMessage = document.getElementById('already-verified-message');
+    const btnSendCode = document.getElementById('btn-send-code');
+    const btnVerifyCode = document.getElementById('btn-verify-code');
+    const codeInputSection = document.getElementById('code-input-section');
+    const verificationCodeInput = document.getElementById('verification-code');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const verificationMessage = document.getElementById('verification-message');
+    const customerPhoneSpan = document.getElementById('customer-phone');
+    const verifiedBadge = document.getElementById('verified-badge');
+    const isPhoneVerifiedInput = document.getElementById('is-phone-verified');
+
+    let selectedCustomerId = null;
+
+    // Escuchar cambio en el select de cliente
+    if (customerSelect) {
+        customerSelect.addEventListener('change', function() {
+            const customerId = this.value;
+            
+            // Ocultar sección de verificación inicialmente
+            verificationSection.classList.add('hidden');
+            noPhoneMessage.classList.add('hidden');
+            alreadyVerifiedMessage.classList.add('hidden');
+            codeInputSection.classList.add('hidden');
+            verifiedBadge.classList.add('hidden');
+            isPhoneVerifiedInput.value = '0';
+            
+            if (!customerId) {
+                selectedCustomerId = null;
+                return;
+            }
+
+            selectedCustomerId = customerId;
+
+            // Verificar estado del teléfono del cliente
+            fetch(`/api/customers/${customerId}/phone-status`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_phone) {
+                        customerPhoneSpan.textContent = data.phone;
+                        verificationSection.classList.remove('hidden');
+                        
+                        if (data.is_verified) {
+                            // Ya está verificado
+                            alreadyVerifiedMessage.classList.remove('hidden');
+                            verifiedBadge.classList.remove('hidden');
+                            btnSendCode.disabled = true;
+                            btnSendCode.classList.add('opacity-50', 'cursor-not-allowed');
+                            isPhoneVerifiedInput.value = '1';
+                        } else {
+                            // No verificado, mostrar botón para enviar código
+                            btnSendCode.disabled = false;
+                            btnSendCode.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    } else {
+                        // No tiene teléfono
+                        noPhoneMessage.classList.remove('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al verificar teléfono:', error);
+                    verificationMessage.innerHTML = '<span class="text-red-600">Error al cargar información del cliente</span>';
+                });
+        });
+    }
+
+    // Enviar código de verificación
+    if (btnSendCode) {
+        btnSendCode.addEventListener('click', function() {
+            if (!selectedCustomerId) {
+                verificationMessage.innerHTML = '<span class="text-red-600">Debe seleccionar un cliente primero</span>';
+                return;
+            }
+
+            loadingSpinner.classList.remove('hidden');
+            btnSendCode.disabled = true;
+            verificationMessage.textContent = '';
+
+            fetch('{{ route("inventory.commercial.contracts.send-verification-code") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ customer_id: selectedCustomerId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingSpinner.classList.add('hidden');
+                
+                if (data.success) {
+                    verificationMessage.innerHTML = '<span class="text-green-600">' + data.message + '</span>';
+                    codeInputSection.classList.remove('hidden');
+                    verificationCodeInput.focus();
+                } else {
+                    verificationMessage.innerHTML = '<span class="text-red-600">' + data.message + '</span>';
+                    btnSendCode.disabled = false;
+                }
+            })
+            .catch(error => {
+                loadingSpinner.classList.add('hidden');
+                btnSendCode.disabled = false;
+                verificationMessage.innerHTML = '<span class="text-red-600">Error de conexión. Intente nuevamente.</span>';
+                console.error('Error:', error);
+            });
+        });
+    }
+
+    // Verificar código ingresado
+    if (btnVerifyCode) {
+        btnVerifyCode.addEventListener('click', function() {
+            const code = verificationCodeInput.value.trim();
+            
+            if (!code || code.length !== 6) {
+                verificationMessage.innerHTML = '<span class="text-red-600">Ingrese un código de 6 dígitos</span>';
+                return;
+            }
+
+            if (!selectedCustomerId) {
+                verificationMessage.innerHTML = '<span class="text-red-600">Debe seleccionar un cliente primero</span>';
+                return;
+            }
+
+            loadingSpinner.classList.remove('hidden');
+            verificationMessage.textContent = '';
+
+            fetch('{{ route("inventory.commercial.contracts.verify-code") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ 
+                    customer_id: selectedCustomerId,
+                    code: code
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingSpinner.classList.add('hidden');
+                
+                if (data.success) {
+                    verificationMessage.innerHTML = '<span class="text-green-600">' + data.message + '</span>';
+                    verifiedBadge.classList.remove('hidden');
+                    codeInputSection.classList.add('hidden');
+                    btnSendCode.disabled = true;
+                    btnSendCode.classList.add('opacity-50', 'cursor-not-allowed');
+                    isPhoneVerifiedInput.value = '1';
+                    
+                    // Marcar como verificado para permitir envío del formulario
+                    setTimeout(() => {
+                        verificationMessage.innerHTML += '<br><span class="text-xs text-gray-500">✅ Teléfono verificado. Puede continuar con la creación del contrato.</span>';
+                    }, 500);
+                } else {
+                    verificationMessage.innerHTML = '<span class="text-red-600">' + data.message + '</span>';
+                    verificationCodeInput.value = '';
+                    verificationCodeInput.focus();
+                }
+            })
+            .catch(error => {
+                loadingSpinner.classList.add('hidden');
+                verificationMessage.innerHTML = '<span class="text-red-600">Error de conexión. Intente nuevamente.</span>';
+                console.error('Error:', error);
+            });
         });
     }
 });

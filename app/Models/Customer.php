@@ -36,6 +36,7 @@ class Customer extends Model
         'is_active',
         // Campos de verificación WhatsApp
         'whatsapp_verification_code',
+        'verification_code_sent_at',
         'phone_verified',
         'whatsapp_verified_at',
     ];
@@ -46,6 +47,7 @@ class Customer extends Model
         'is_active' => 'boolean',
         'phone_verified' => 'boolean',
         'whatsapp_verified_at' => 'datetime',
+        'verification_code_sent_at' => 'datetime',
     ];
 
     protected $appends = [

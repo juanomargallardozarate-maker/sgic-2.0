@@ -11,6 +11,7 @@ use App\Models\Beneficiary;
 use App\Models\Heir;
 use App\Models\GlobalSetting;
 use App\Models\InterestRate;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +99,63 @@ class ContractController extends Controller
             'maintenanceFee',
             'interestRates'
         ));
+    }
+
+    /**
+     * Enviar código de verificación WhatsApp al cliente
+     */
+    public function sendVerificationCode(Request $request, WhatsAppService $whatsappService)
+    {
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+        ]);
+
+        $customer = Customer::find($validated['customer_id']);
+
+        if (!$customer || !$customer->phone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El cliente no tiene un número de teléfono registrado.',
+            ], 400);
+        }
+
+        // Verificar si ya está verificado
+        if ($customer->isPhoneVerified()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El teléfono de este cliente ya está verificado.',
+            ], 400);
+        }
+
+        // Enviar código
+        $result = $whatsappService->sendVerificationCode($customer);
+
+        return response()->json($result);
+    }
+
+    /**
+     * Verificar código ingresado por el cliente
+     */
+    public function verifyCode(Request $request, WhatsAppService $whatsappService)
+    {
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'code' => 'required|string|size:6',
+        ]);
+
+        $customer = Customer::find($validated['customer_id']);
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cliente no encontrado.',
+            ], 404);
+        }
+
+        // Verificar código
+        $result = $whatsappService->verifyCode($customer, $validated['code']);
+
+        return response()->json($result);
     }
 
     /**
@@ -238,20 +296,13 @@ class ContractController extends Controller
         // ============================================
         // VERIFICACIÓN DE TELÉFONO VÍA WHATSAPP
         // ============================================
-        $phoneVerified = false;
-        $verifiedAt = null;
+        $customer = Customer::find($validated['customer_id']);
         
-        // Si hay teléfono y código de verificación, validar
-        if (!empty($request->phone) && !empty($validated['verification_code'])) {
-            $customer = Customer::find($validated['customer_id']);
-            if ($customer && !empty($customer->phone)) {
-                // Verificar código contra el almacenado en sesión o BD
-                $storedCode = session('whatsapp_verification_code_' . $customer->phone);
-                if ($storedCode && $storedCode === $validated['verification_code']) {
-                    $phoneVerified = true;
-                    $verifiedAt = now();
-                }
-            }
+        // Validar que el cliente tenga el teléfono verificado
+        if (!$customer || !$customer->isPhoneVerified()) {
+            return back()->withErrors([
+                'phone_verified' => 'El teléfono del cliente debe estar verificado antes de crear un contrato.'
+            ])->withInput();
         }
         
         // ============================================
@@ -294,8 +345,6 @@ class ContractController extends Controller
                 'monthly_payment' => $validated['monthly_payment'],
                 'maintenance_fee_snapshot' => $validated['maintenance_fee_snapshot'],
                 'interest_rate_snapshot' => $validated['interest_rate_snapshot'],
-                'phone_verified' => $validated['phone_verified'],
-                'verified_at' => $validated['verified_at'],
                 'status' => 'draft',
                 'notes' => $validated['notes'] ?? null,
                 'created_by_user_id' => Auth::id(),
@@ -328,6 +377,21 @@ class ContractController extends Controller
             }
 
             DB::commit();
+
+            // ============================================
+            // ENVIAR NOTIFICACIÓN WHATSAPP - NUEVO CONTRATO
+            // ============================================
+            $whatsappService = new WhatsAppService();
+            $cryptInfo = $contract->crypt->code ?? 'N/A';
+            if ($contract->crypt->level) {
+                $cryptInfo = $contract->crypt->level->name ?? $cryptInfo;
+            }
+            
+            $whatsappService->sendNewContractNotification($customer, [
+                'contract_number' => $contract->contract_number,
+                'crypt_info' => $cryptInfo,
+                'price' => $contract->price,
+            ]);
 
             return redirect()->route('commercial.contracts.show', $contract)
                 ->with('success', 'Contrato creado exitosamente. Folio: ' . $contract->contract_number);
