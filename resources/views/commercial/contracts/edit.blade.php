@@ -7,7 +7,7 @@
     <div class="max-w-4xl mx-auto">
         {{-- Header --}}
         <div class="mb-6">
-            <a href="{{ route('inventory.commercial.contracts.show', $contract) }}" class="text-emerald-600 hover:text-emerald-900 mb-2 inline-block">
+            <a href="{{ route('commercial.contracts.show', $contract) }}" class="text-emerald-600 hover:text-emerald-900 mb-2 inline-block">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver al Contrato
             </a>
             <h1 class="text-2xl font-bold text-gray-900">Editar Contrato {{ $contract->contract_number }}</h1>
@@ -15,7 +15,7 @@
         </div>
 
         {{-- Form --}}
-        <form method="POST" action="{{ route('inventory.commercial.contracts.update', $contract) }}" class="bg-white rounded-lg shadow p-6">
+        <form method="POST" action="{{ route('commercial.contracts.update', $contract) }}" class="bg-white rounded-lg shadow p-6">
             @csrf
             @method('PUT')
 
@@ -167,7 +167,7 @@
 
             {{-- Actions --}}
             <div class="flex justify-end gap-3 pt-4 border-t">
-                <a href="{{ route('inventory.commercial.contracts.show', $contract) }}" 
+                <a href="{{ route('commercial.contracts.show', $contract) }}" 
                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
                     Cancelar
                 </a>

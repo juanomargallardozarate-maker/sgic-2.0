@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Contratos</h1>
             <p class="text-sm text-gray-600 mt-1">Gestión de contratos perpetuos y temporales</p>
         </div>
-        <a href="{{ route('inventory.commercial.contracts.create') }}" 
+        <a href="{{ route('commercial.contracts.create') }}" 
            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
             <i class="fa-solid fa-plus mr-2"></i>
             Nuevo Contrato
@@ -39,7 +39,7 @@
 
     {{-- Filters --}}
     <div class="bg-white rounded-lg shadow mb-6 p-4">
-        <form method="GET" action="{{ route('inventory.commercial.contracts.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="GET" action="{{ route('commercial.contracts.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                 <input type="text" name="search" value="{{ request('search') }}" 
@@ -159,12 +159,12 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('inventory.commercial.contracts.show', $contract) }}" 
+                            <a href="{{ route('commercial.contracts.show', $contract) }}" 
                                class="text-emerald-600 hover:text-emerald-900 mr-3">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                             @if($contract->status === 'draft')
-                                <a href="{{ route('inventory.commercial.contracts.edit', $contract) }}" 
+                                <a href="{{ route('commercial.contracts.edit', $contract) }}" 
                                    class="text-blue-600 hover:text-blue-900 mr-3">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
