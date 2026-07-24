@@ -30,7 +30,11 @@ return new class extends Migration
             }
             
             // Actualizar índice único para prevenir duplicados
-            $table->dropUnique(['contract_id', 'beneficiary_customer_id']);
+            // El nombre del índice existente es 'beneficiaries_contract_id_customer_id_unique'
+            // porque fue creado antes del renameColumn
+            if (Schema::hasIndex('beneficiaries', 'beneficiaries_contract_id_customer_id_unique')) {
+                $table->dropUnique('beneficiaries_contract_id_customer_id_unique');
+            }
             $table->unique(['customer_id', 'beneficiary_customer_id'], 'beneficiaries_customer_beneficiary_unique');
         });
     }
