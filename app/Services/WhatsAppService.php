@@ -25,8 +25,8 @@ class WhatsAppService
         // Generar código de 6 dígitos
         $code = sprintf('%06d', mt_rand(0, 999999));
         
-        // Guardar código en el cliente
-        $customer->verification_code = $code;
+        // Guardar código en el cliente usando los nombres correctos de campos
+        $customer->whatsapp_verification_code = $code;
         $customer->verification_code_sent_at = now();
         $customer->save();
 
@@ -69,7 +69,7 @@ class WhatsAppService
     public function verifyCode(Customer $customer, string $code): array
     {
         // Verificar si el código existe y no ha expirado (10 minutos)
-        if (!$customer->verification_code || $customer->verification_code !== $code) {
+        if (!$customer->whatsapp_verification_code || $customer->whatsapp_verification_code !== $code) {
             return [
                 'success' => false,
                 'message' => 'Código inválido.',
@@ -79,7 +79,7 @@ class WhatsAppService
         $codeSentAt = $customer->verification_code_sent_at;
         if ($codeSentAt && $codeSentAt->diffInMinutes(now()) > 10) {
             // Código expirado
-            $customer->verification_code = null;
+            $customer->whatsapp_verification_code = null;
             $customer->verification_code_sent_at = null;
             $customer->save();
             
@@ -91,8 +91,8 @@ class WhatsAppService
 
         // Marcar como verificado
         $customer->phone_verified = true;
-        $customer->verified_at = now();
-        $customer->verification_code = null;
+        $customer->whatsapp_verified_at = now();
+        $customer->whatsapp_verification_code = null;
         $customer->verification_code_sent_at = null;
         $customer->save();
 
