@@ -170,8 +170,6 @@ class ContractController extends Controller
             'beneficiaries' => 'nullable|array',
             'heirs' => 'nullable|array',
             'notes' => 'nullable|string|max:1000',
-            'phone' => 'nullable|string|max:20',
-            'verification_code' => 'nullable|string|size:6',
         ], [
             'crypt_id.required' => 'Debe seleccionar una cripta.',
             'customer_id.required' => 'Debe seleccionar un cliente.',
