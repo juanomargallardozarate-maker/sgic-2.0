@@ -45,11 +45,11 @@ class SettingsSeeder extends Seeder
             InterestRate::firstOrCreate(
                 [
                     'cemetery_id' => $cemetery->id,
+                    'tenant_id' => $cemetery->tenant_id,
                     'min_months' => $rate['min_months'],
                     'max_months' => $rate['max_months']
                 ],
                 [
-                    'tenant_id' => $cemetery->tenant_id,
                     'percentage' => $rate['percentage'],
                     'description' => $rate['description'],
                     'is_active' => true
