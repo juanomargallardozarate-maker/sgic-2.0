@@ -42,13 +42,14 @@ class SettingsSeeder extends Seeder
         ];
 
         foreach ($rates as $rate) {
-            InterestRate::updateOrCreate(
+            InterestRate::firstOrCreate(
                 [
+                    'cemetery_id' => $cemetery->id,
                     'min_months' => $rate['min_months'],
                     'max_months' => $rate['max_months']
                 ],
                 [
-                    'percentage' => $rate['percentage'],
+                    'interest_rate' => $rate['percentage'],
                     'description' => $rate['description'],
                     'is_active' => true
                 ]
