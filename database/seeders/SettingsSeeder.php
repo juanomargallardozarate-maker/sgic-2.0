@@ -49,6 +49,7 @@ class SettingsSeeder extends Seeder
                     'max_months' => $rate['max_months']
                 ],
                 [
+                    'tenant_id' => $cemetery->tenant_id,
                     'percentage' => $rate['percentage'],
                     'description' => $rate['description'],
                     'is_active' => true
