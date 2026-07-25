@@ -30,20 +30,23 @@ class SettingsSeeder extends Seeder
             $cemetery->id
         );
 
-        // Tasas de interés por cantidad de meses (ejemplos)
+        // Tasas de interés por rango de meses (ejemplos)
         $rates = [
-            ['months' => 3, 'percentage' => 5.00, 'description' => 'Interés para 3 meses'],
-            ['months' => 6, 'percentage' => 10.00, 'description' => 'Interés para 6 meses'],
-            ['months' => 9, 'percentage' => 15.00, 'description' => 'Interés para 9 meses'],
-            ['months' => 12, 'percentage' => 20.00, 'description' => 'Interés para 12 meses'],
-            ['months' => 18, 'percentage' => 25.00, 'description' => 'Interés para 18 meses'],
-            ['months' => 24, 'percentage' => 30.00, 'description' => 'Interés para 24 meses'],
-            ['months' => 36, 'percentage' => 40.00, 'description' => 'Interés para 36 meses'],
+            ['min_months' => 1, 'max_months' => 3, 'percentage' => 5.00, 'description' => 'Interés para 1-3 meses'],
+            ['min_months' => 4, 'max_months' => 6, 'percentage' => 10.00, 'description' => 'Interés para 4-6 meses'],
+            ['min_months' => 7, 'max_months' => 9, 'percentage' => 15.00, 'description' => 'Interés para 7-9 meses'],
+            ['min_months' => 10, 'max_months' => 12, 'percentage' => 20.00, 'description' => 'Interés para 10-12 meses'],
+            ['min_months' => 13, 'max_months' => 18, 'percentage' => 25.00, 'description' => 'Interés para 13-18 meses'],
+            ['min_months' => 19, 'max_months' => 24, 'percentage' => 30.00, 'description' => 'Interés para 19-24 meses'],
+            ['min_months' => 25, 'max_months' => 36, 'percentage' => 40.00, 'description' => 'Interés para 25-36 meses'],
         ];
 
         foreach ($rates as $rate) {
             InterestRate::updateOrCreate(
-                ['months' => $rate['months']],
+                [
+                    'min_months' => $rate['min_months'],
+                    'max_months' => $rate['max_months']
+                ],
                 [
                     'percentage' => $rate['percentage'],
                     'description' => $rate['description'],
