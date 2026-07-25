@@ -41,20 +41,19 @@ class SettingsSeeder extends Seeder
             ['min_months' => 25, 'max_months' => 36, 'percentage' => 40.00, 'description' => 'Interés para 25-36 meses'],
         ];
 
+        // Limpiar tasas de interés existentes para este cementerio antes de insertar
+        InterestRate::where('cemetery_id', $cemetery->id)->delete();
+
         foreach ($rates as $rate) {
-            InterestRate::firstOrCreate(
-                [
-                    'cemetery_id' => $cemetery->id,
-                    'tenant_id' => $cemetery->tenant_id,
-                    'min_months' => $rate['min_months'],
-                    'max_months' => $rate['max_months']
-                ],
-                [
-                    'percentage' => $rate['percentage'],
-                    'description' => $rate['description'],
-                    'is_active' => true
-                ]
-            );
+            InterestRate::create([
+                'cemetery_id' => $cemetery->id,
+                'tenant_id' => $cemetery->tenant_id,
+                'min_months' => $rate['min_months'],
+                'max_months' => $rate['max_months'],
+                'percentage' => $rate['percentage'],
+                'description' => $rate['description'],
+                'is_active' => true
+            ]);
         }
         
         $this->command->info('✅ Configuraciones y tasas de interés creadas exitosamente.');
