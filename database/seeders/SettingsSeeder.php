@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Cemetery;
 use App\Models\GlobalSetting;
 use App\Models\InterestRate;
 use Illuminate\Database\Seeder;
@@ -13,11 +14,20 @@ class SettingsSeeder extends Seeder
      */
     public function run(): void
     {
+        // Obtener el primer cementerio para asociar las configuraciones
+        $cemetery = Cemetery::first();
+        
+        if (!$cemetery) {
+            $this->command->warn('⚠️ No se encontró ningún cementerio. Las configuraciones no se pueden crear sin un cementerio.');
+            return;
+        }
+
         // Configuración de Cuota de Mantenimiento Anual
         GlobalSetting::setValue(
             'maintenance_fee', 
             1500.00, 
-            'Cuota de mantenimiento anual del cementerio'
+            'Cuota de mantenimiento anual del cementerio',
+            $cemetery->id
         );
 
         // Tasas de interés por cantidad de meses (ejemplos)
@@ -41,5 +51,7 @@ class SettingsSeeder extends Seeder
                 ]
             );
         }
+        
+        $this->command->info('✅ Configuraciones y tasas de interés creadas exitosamente.');
     }
 }
