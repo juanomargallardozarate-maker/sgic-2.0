@@ -18,6 +18,12 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        // Verificar que el usuario tenga al menos un rol
+        if (!$user->roles || $user->roles->isEmpty()) {
+            return redirect()->route('profile.edit')
+                ->with('error', 'No tienes roles asignados. Contacta al administrador.');
+        }
+
         // SuperAdmin → Dashboard SaaS
         if ($user->hasRole('super_admin')) {
             return $this->superAdminDashboard();
