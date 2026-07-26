@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Cemetery;
-use App\Models\GlobalSetting;
-use App\Models\InterestRate;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Tenant;
 
 class SettingsSeeder extends Seeder
 {
@@ -14,48 +14,80 @@ class SettingsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Obtener el primer cementerio para asociar las configuraciones
-        $cemetery = Cemetery::first();
-        
-        if (!$cemetery) {
-            $this->command->warn('⚠️ No se encontró ningún cementerio. Las configuraciones no se pueden crear sin un cementerio.');
+        // Obtenemos todos los tenants activos
+        $tenants = Tenant::where('is_active', true)->get();
+
+        if ($tenants->isEmpty()) {
+            $this->command->warn('No hay tenants activos para seedear.');
             return;
         }
 
-        // Configuración de Cuota de Mantenimiento Anual
-        GlobalSetting::setValue(
-            'maintenance_fee', 
-            1500.00, 
-            'Cuota de mantenimiento anual del cementerio',
-            $cemetery->id
-        );
+        foreach ($tenants as $tenant) {
+            try {
+                // 1. Inicializar el contexto del tenant (CRUCIAL)
+                tenancy()->initialize($tenant);
 
-        // Tasas de interés por rango de meses (ejemplos)
-        $rates = [
-            ['min_months' => 1, 'max_months' => 3, 'percentage' => 5.00, 'description' => 'Interés para 1-3 meses'],
-            ['min_months' => 4, 'max_months' => 6, 'percentage' => 10.00, 'description' => 'Interés para 4-6 meses'],
-            ['min_months' => 7, 'max_months' => 9, 'percentage' => 15.00, 'description' => 'Interés para 7-9 meses'],
-            ['min_months' => 10, 'max_months' => 12, 'percentage' => 20.00, 'description' => 'Interés para 10-12 meses'],
-            ['min_months' => 13, 'max_months' => 18, 'percentage' => 25.00, 'description' => 'Interés para 13-18 meses'],
-            ['min_months' => 19, 'max_months' => 24, 'percentage' => 30.00, 'description' => 'Interés para 19-24 meses'],
-            ['min_months' => 25, 'max_months' => 36, 'percentage' => 40.00, 'description' => 'Interés para 25-36 meses'],
-        ];
+                $this->command->info("Procesando tenant: {$tenant->name} (ID: {$tenant->id})");
 
-        // Limpiar tasas de interés existentes para este cementerio antes de insertar
-        InterestRate::where('cemetery_id', $cemetery->id)->delete();
+                // 2. LIMPIAR la tabla interest_rates para ESTE tenant específico
+                // Usamos delete() con where para asegurar que borramos solo los de este tenant
+                // si por alguna razón la conexión apunta a una DB compartida, aunque con tenancy() debería ser la correcta.
+                DB::table('interest_rates')->where('tenant_id', $tenant->id)->delete();
+                
+                // Opción alternativa más agresiva si estás seguro de estar en la DB del tenant:
+                // DB::table('interest_rates')->truncate(); 
 
-        foreach ($rates as $rate) {
-            InterestRate::create([
-                'cemetery_id' => $cemetery->id,
-                'tenant_id' => $cemetery->tenant_id,
-                'min_months' => $rate['min_months'],
-                'max_months' => $rate['max_months'],
-                'percentage' => $rate['percentage'],
-                'description' => $rate['description'],
-                'is_active' => true
-            ]);
+                // 3. Definir los datos a insertar
+                $rates = [
+                    [
+                        'min_months' => 1,
+                        'max_months' => 3,
+                        'percentage' => '5.00',
+                        'description' => 'Interés para 1-3 meses',
+                    ],
+                    [
+                        'min_months' => 4,
+                        'max_months' => 6,
+                        'percentage' => '10.00',
+                        'description' => 'Interés para 4-6 meses',
+                    ],
+                    [
+                        'min_months' => 7,
+                        'max_months' => 12,
+                        'percentage' => '15.00',
+                        'description' => 'Interés para 7-12 meses',
+                    ],
+                ];
+
+                // 4. Insertar manualmente usando DB::table para evitar conflictos de modelos
+                foreach ($rates as $rate) {
+                    DB::table('interest_rates')->insert([
+                        'tenant_id' => $tenant->id,
+                        'cemetery_id' => $tenant->id, // Ajusta si cemetery_id es diferente
+                        'min_months' => $rate['min_months'],
+                        'max_months' => $rate['max_months'],
+                        'percentage' => $rate['percentage'],
+                        'description' => $rate['description'],
+                        'is_active' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                $this->command->info("  -> Tasas de interés insertadas correctamente.");
+
+                // 5. Cerrar el contexto del tenant
+                tenancy()->end();
+
+            } catch (\Exception $e) {
+                $this->command->error("Error al procesar tenant {$tenant->id}: " . $e->getMessage());
+                // Asegurarse de cerrar el contexto en caso de error
+                if (tenancy()->isInitialized()) {
+                    tenancy()->end();
+                }
+            }
         }
         
-        $this->command->info('✅ Configuraciones y tasas de interés creadas exitosamente.');
+        $this->command->info('Seed completado para todos los tenants.');
     }
 }
