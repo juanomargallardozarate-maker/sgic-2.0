@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('cemeteries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->string('name', 150);
             $table->string('address', 255);
             $table->string('municipality', 100);

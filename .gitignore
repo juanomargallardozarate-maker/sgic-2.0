@@ -1,34 +1,34 @@
 ```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-dist/
-build/
-
-# Dependencies
+# Laravel-specific ignores
 vendor/
-node_modules/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Environment
+composer.lock
 .env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
-
-# Laravel-specific
+.env.*
+!.env.example
 bootstrap/cache/
 storage/logs/
 storage/framework/
 public/storage/
-composer.lock
+
+# Database
+database/seeds/
+database/factories/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+storage/logs/*
+
+# Cache
+.cache/
+.phpunit.result.cache
 ```

@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('interest_rates', function (Blueprint $table) {
-            $table->foreignId('tenant_id')->after('id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id')->after('id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->dropUnique(['months']); // Quitamos el unique simple
             $table->unique(['tenant_id', 'months']); // Cada tenant tiene sus propias tasas por meses
         });

@@ -11,7 +11,8 @@ return new class extends Migration
     {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('action', 50); // created, updated, deleted, restored, signed, etc.
             $table->string('model', 100); // App\Models\Customer
