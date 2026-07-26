@@ -14,28 +14,27 @@ class SettingsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Obtenemos todos los tenants activos
+        $this->command->info('Iniciando SettingsSeeder...');
+
+        // Obtener todos los tenants activos
         $tenants = Tenant::where('is_active', true)->get();
 
         if ($tenants->isEmpty()) {
-            $this->command->warn('No hay tenants activos para seedear.');
+            $this->command->warn('No se encontraron tenants activos.');
             return;
         }
 
         foreach ($tenants as $tenant) {
             try {
-                // 1. Inicializar el contexto del tenant (CRUCIAL)
-                tenancy()->initialize($tenant);
-
                 $this->command->info("Procesando tenant: {$tenant->name} (ID: {$tenant->id})");
 
-                // 2. LIMPIAR la tabla interest_rates para ESTE tenant específico
-                // Usamos delete() con where para asegurar que borramos solo los de este tenant
-                // si por alguna razón la conexión apunta a una DB compartida, aunque con tenancy() debería ser la correcta.
-                DB::table('interest_rates')->where('tenant_id', $tenant->id)->delete();
-                
-                // Opción alternativa más agresiva si estás seguro de estar en la DB del tenant:
-                // DB::table('interest_rates')->truncate(); 
+                // 1. Inicializar el contexto del tenant
+                tenancy()->initialize($tenant);
+
+                // 2. Limpiar la tabla interest_rates EXPLÍCITAMENTE para este tenant
+                // Usamos DB::statement para asegurar que se ejecute sin modelos ni scopes
+                $this->command->info("  -> Limpiando tabla interest_rates...");
+                DB::statement('DELETE FROM interest_rates WHERE tenant_id = ?', [$tenant->id]);
 
                 // 3. Definir los datos a insertar
                 $rates = [
@@ -60,6 +59,7 @@ class SettingsSeeder extends Seeder
                 ];
 
                 // 4. Insertar manualmente usando DB::table para evitar conflictos de modelos
+                $now = now();
                 foreach ($rates as $rate) {
                     DB::table('interest_rates')->insert([
                         'tenant_id' => $tenant->id,
@@ -69,25 +69,31 @@ class SettingsSeeder extends Seeder
                         'percentage' => $rate['percentage'],
                         'description' => $rate['description'],
                         'is_active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                 }
 
-                $this->command->info("  -> Tasas de interés insertadas correctamente.");
+                $this->command->info("  -> Tasas insertadas correctamente.");
 
                 // 5. Cerrar el contexto del tenant
                 tenancy()->end();
 
             } catch (\Exception $e) {
-                $this->command->error("Error al procesar tenant {$tenant->id}: " . $e->getMessage());
-                // Asegurarse de cerrar el contexto en caso de error
-                if (tenancy()->isInitialized()) {
+                $this->command->error("Error crítico en tenant {$tenant->id}: " . $e->getMessage());
+                
+                // Asegurar que se cierre el contexto si hubo error
+                try {
                     tenancy()->end();
+                } catch (\Exception $closeEx) {
+                    // Ignorar error al cerrar
                 }
+                
+                // Lanzar la excepción para detener el proceso si algo salió muy mal
+                throw $e;
             }
         }
-        
-        $this->command->info('Seed completado para todos los tenants.');
+
+        $this->command->info('SettingsSeeder completado exitosamente.');
     }
 }
