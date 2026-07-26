@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tenants', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name', 150);
             $table->string('rfc', 13)->unique(); // RFC México
             $table->string('subdomain', 63)->unique(); // {tenant}.sgic.mx

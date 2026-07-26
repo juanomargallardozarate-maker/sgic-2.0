@@ -21,6 +21,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     use HasFactory, SoftDeletes;
 
     /**
+     * Indicar que la clave primaria es un UUID (string) y no auto-incremental.
+     */
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    /**
      * Los atributos que son asignables masivamente.
      */
     protected $fillable = [
