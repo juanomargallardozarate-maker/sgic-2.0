@@ -1,34 +1,48 @@
-```
-# Laravel-specific ignores
-vendor/
-composer.lock
+```php
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
+.env.local
 .env.*
-!.env.example
-bootstrap/cache/
-storage/logs/
-storage/framework/
-public/storage/
 
-# Database
-database/seeds/
-database/factories/
-
-# IDE
-.vscode/
-.idea/
+# Logs and temp files
+*.log
+*.tmp
 *.swp
 *.swo
 
-# OS
+# Build directories
+dist/
+build/
+target/
+.coverage
+coverage/
+htmlcov/
+
+# Editors
+.vscode/
+.idea/
+
+# System files
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-storage/logs/*
-
-# Cache
-.cache/
-.phpunit.result.cache
+# Caches
+.mypy_cache/
+.pytest_cache/
+.gradle/
 ```
