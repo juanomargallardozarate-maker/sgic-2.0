@@ -11,7 +11,8 @@ return new class extends Migration
         // Secciones / Manzanas
         Schema::create('sections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->string('code', 20); // Ej: "A", "SAN_PEDRO"
             $table->string('name', 100);
             $table->text('description')->nullable();
@@ -25,7 +26,8 @@ return new class extends Migration
         // Bloques
         Schema::create('blocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('section_id')->constrained()->onDelete('cascade');
             $table->string('code', 20); // Ej: "1", "B1"
             $table->string('name', 100);
@@ -40,7 +42,8 @@ return new class extends Migration
         // Niveles
         Schema::create('levels', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('block_id')->constrained()->onDelete('cascade');
             $table->string('code', 20); // Ej: "1", "N1"
             $table->string('name', 100);
@@ -53,7 +56,8 @@ return new class extends Migration
         // Criptas (entidad core)
         Schema::create('crypts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('level_id')->constrained()->onDelete('cascade');
             $table->foreignId('crypt_type_id')->constrained()->onDelete('restrict');
             $table->foreignId('crypt_status_id')->constrained()->onDelete('restrict');

@@ -21,7 +21,8 @@ return new class extends Migration
         // Pagos (RN-04)
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('contract_id')->constrained()->onDelete('restrict');
             $table->foreignId('payment_method_id')->nullable()->constrained()->nullOnDelete();
             $table->string('payment_number', 50); // Número de pago/folio
@@ -46,7 +47,8 @@ return new class extends Migration
         // Facturas CFDI 4.0 (SAT México)
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->foreignId('payment_id')->nullable()->constrained()->nullOnDelete();
             $table->string('folio', 50)->unique(); // Folio fiscal interno
@@ -79,7 +81,8 @@ return new class extends Migration
         // Deudas acumuladas (RN-04)
         Schema::create('debts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('contract_id')->constrained()->onDelete('cascade');
             $table->foreignId('crypt_id')->constrained()->onDelete('cascade');
             $table->decimal('total_debt', 12, 2)->default(0);
@@ -106,7 +109,8 @@ return new class extends Migration
         // Planes de pago (para deudas)
         Schema::create('payment_plans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('debt_id')->constrained()->onDelete('cascade');
             $table->string('plan_number', 50)->unique();
             $table->decimal('total_amount', 12, 2);

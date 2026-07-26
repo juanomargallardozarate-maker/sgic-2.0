@@ -29,7 +29,8 @@ return new class extends Migration
         // =====================================================
         Schema::create('crews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->string('name', 100);
             $table->string('vehicle_plate', 20)->nullable();
             $table->boolean('is_active')->default(true);
@@ -53,7 +54,8 @@ return new class extends Migration
         // =====================================================
         Schema::create('work_orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('work_order_type_id')->constrained()->onDelete('restrict');
             $table->foreignId('crypt_id')->constrained()->onDelete('restrict');
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
@@ -103,7 +105,8 @@ return new class extends Migration
         Schema::create('work_order_evidences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('work_order_id')->constrained()->onDelete('cascade');
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->enum('type', ['photo', 'signature', 'document']);
             $table->string('file_url', 500);
             $table->string('file_hash', 64); // SHA-256 del archivo

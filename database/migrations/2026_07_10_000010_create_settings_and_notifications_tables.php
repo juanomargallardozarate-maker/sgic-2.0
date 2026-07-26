@@ -14,7 +14,8 @@ return new class extends Migration
         // Configuraciones del tenant
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->string('key', 100); // Ej: "maintenance_fee", "grace_period_years"
             $table->string('type', 30)->default('string'); // string, number, boolean, json
             $table->text('value'); // Valor almacenado como texto
@@ -29,7 +30,8 @@ return new class extends Migration
         // Plantillas de notificaciones
         Schema::create('notification_templates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->string('code', 50)->unique(); // contract_expiry, payment_due, debt_blocked, etc.
             $table->string('name', 150);
             $table->enum('channel', ['email', 'sms', 'whatsapp', 'push']);
@@ -44,7 +46,8 @@ return new class extends Migration
         // Notificaciones enviadas
         Schema::create('notifications_sent', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('contract_id')->nullable()->constrained()->nullOnDelete();
             $table->string('template_code', 50)->nullable();
@@ -65,7 +68,8 @@ return new class extends Migration
         // Recordatorios automáticos
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('contract_id')->constrained()->onDelete('cascade');
             $table->string('type', 50); // payment_due, contract_expiry, maintenance_due
             $table->timestamp('scheduled_at');
@@ -79,7 +83,8 @@ return new class extends Migration
         // Documentos del sistema
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('contract_id')->nullable()->constrained()->nullOnDelete();
             $table->string('type', 50); // contract, receipt, certificate, legal, other
