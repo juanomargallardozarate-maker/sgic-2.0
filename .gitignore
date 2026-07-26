@@ -1,10 +1,9 @@
+```php
 # Compiled and build artifacts
 *.pyc
 __pycache__/
 *.o
 *.obj
-dist/
-build/
 *.class
 *.exe
 *.dll
@@ -13,13 +12,12 @@ build/
 *.out
 
 # Dependencies
-.venv/
-venv/
 node_modules/
-.mypy_cache/
-.pytest_cache/
-target/
-.gradle/
+vendor/
+composer.lock
+.env
+.env.local
+.env.*
 
 # Logs and temp files
 *.log
@@ -27,10 +25,13 @@ target/
 *.swp
 *.swo
 
-# Environment
-.env
-.env.local
-*.env.*
+# Build directories
+dist/
+build/
+target/
+coverage/
+htmlcov/
+*.coverage
 
 # Editors
 .vscode/
@@ -38,16 +39,11 @@ target/
 *.swp
 *.swo
 
-# System files
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Compressed files
+# Compression files
 *.zip
 *.gz
 *.tar
@@ -70,3 +66,39 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Python specific
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.Python
+*.egg-info/
+.eggs/
+.coverage
+.tox/
+.nox/
+.coverage.*
+.cache
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+
+# PHP specific
+*.phar
+vendor/composer/
+composer.lock
+.php_cs
+.php_cs.dist
+
+# Laravel/PHP frameworks
+bootstrap/cache/
+storage/logs/
+storage/framework/
+public/storage/
+!.env.example
+.env.*
+!.env
+```
