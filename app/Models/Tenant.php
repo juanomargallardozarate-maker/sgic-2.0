@@ -41,6 +41,33 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     ];
 
     /**
+     * Indicar a Stancl Tenancy qué columnas son explícitas en la base de datos
+     * para que NO se guarden en la columna JSON 'data'.
+     */
+    public static function getCustomColumns(): array
+    {
+        return [
+            'id',
+            'name',
+            'rfc',
+            'subdomain',
+            'plan',
+            'grace_period_years',
+            'debt_months_to_block',
+            'moratorium_interest_rate',
+            'reservation_days',
+            'reservation_deposit_percent',
+            'maintenance_grace_days',
+            'settings',
+            'is_active',
+            'subscription_ends_at',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ];
+    }
+
+    /**
      * Los atributos que deben ser convertidos a tipos nativos.
      */
     protected $casts = [
