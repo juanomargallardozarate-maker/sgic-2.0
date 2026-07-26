@@ -62,8 +62,9 @@ Route::middleware(['auth', 'role:super_admin'])
 |--------------------------------------------------------------------------
 | NOTA: El middleware 'tenant' identifica el cementerio por subdominio.
 | El middleware 'role' ahora incluye 'super_admin' para permitir auditoría.
+| SINTAXIS CORRECTA: Usar pipes (|) para separar múltiples roles en Spatie v6+
 */
-Route::middleware(['auth', 'role:super_admin,admin_cemetery,admin,operativo,consulta'])
+Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|consulta'])
     ->group(function () {
 
         // EPIC 2: Inventario y Jerarquía
@@ -72,7 +73,7 @@ Route::middleware(['auth', 'role:super_admin,admin_cemetery,admin,operativo,cons
             // ==========================================
             // GESTIÓN DE JERARQUÍA (SOLO ADMINISTRADORES)
             // ==========================================
-            Route::middleware(['role:super_admin,admin_cemetery,admin'])
+            Route::middleware(['role:super_admin|admin_cemetery|admin'])
                 ->prefix('hierarchy')
                 ->name('hierarchy.')
                 ->group(function () {

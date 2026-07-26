@@ -289,6 +289,10 @@ class ContractController extends Controller
             ])->withInput();
         }
         
+        // Campos de verificación WhatsApp
+        $phoneVerified = true;
+        $verifiedAt = now();
+        
         // ============================================
         // PREPARAR DATOS PARA GUARDAR
         // ============================================
