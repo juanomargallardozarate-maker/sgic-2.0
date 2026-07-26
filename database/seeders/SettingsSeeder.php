@@ -9,6 +9,9 @@ use App\Models\Tenant;
 
 class SettingsSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $this->command->info("Iniciando SettingsSeeder...");
@@ -25,22 +28,53 @@ class SettingsSeeder extends Seeder
             try {
                 $this->command->info("Procesando tenant: {$tenant->name} (ID: {$tenant->id})");
 
-                // 1. Inicializar el contexto del tenant
-                // Esto cambia automáticamente la conexión a la BD correcta (ej. sgic_2)
-                tenancy()->initialize($tenant);
+                // 1. Obtener el nombre REAL de la base de datos del tenant
+                // Stancl guarda esto en la columna 'tenancy_db_name' o similar, 
+                // pero si usas la estructura por defecto, a veces es necesario construirla.
+                // Intentamos leerla directamente de los atributos del tenant.
+                $dbName = $tenant->tenancy_db_name ?? null;
 
-                // 2. Verificar si la tabla existe y truncarla
-                // Al estar en contexto, esto afecta a la BD del tenant, no a la central
-                if (Schema::hasTable('interest_rates')) {
-                    $this->command->info("  -> Limpiando tabla interest_rates en " . config('database.connections.tenant.database') . "...");
-                    DB::table('interest_rates')->truncate();
-                    $this->command->info("  -> Tabla limpiada correctamente.");
-                } else {
-                    $this->command->warn("  -> La tabla interest_rates no existe en este tenant.");
+                // Si no existe el atributo directo, intentamos inferirlo o lanzar error para depurar
+                if (!$dbName) {
+                    // Fallback común si no hay columna explícita: a veces es 'sgic_' . $tenant->id
+                    // Pero lo ideal es que el modelo tenga el dato. Si falla aquí, revisa tu migración de tenants.
+                    // Para este caso, asumiremos que el tenant tiene el método getDatabaseName() o el atributo.
+                    // Si usas la implementación estándar de Stancl, el nombre está en $tenant->tenancy_db_name.
+                     throw new \Exception("No se pudo determinar el nombre de la BD para el tenant {$tenant->id}. Verifica la columna 'tenancy_db_name'.");
                 }
 
-                // 3. Insertar nuevos datos
-                // Usamos inserción directa para evitar conflictos de modelos
+                $this->command->info("  -> Base de datos objetivo confirmada: {$dbName}");
+
+                // 2. FORZAR CONEXIÓN DIRECTA A LA BD DEL TENANT
+                // Configuramos una conexión temporal llamada 'tenant_direct'
+                config([
+                    'database.connections.tenant_direct' => [
+                        'driver' => 'mysql',
+                        'host' => config('database.connections.mysql.host'),
+                        'port' => config('database.connections.mysql.port'),
+                        'database' => $dbName,
+                        'username' => config('database.connections.mysql.username'),
+                        'password' => config('database.connections.mysql.password'),
+                        'charset' => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'prefix' => '',
+                        'strict' => true,
+                        'engine' => null,
+                    ],
+                ]);
+
+                // 3. LIMPIEZA FORZADA EN ESA CONEXIÓN ESPECÍFICA
+                $this->command->info("  -> Ejecutando TRUNCATE en {$dbName}...");
+                
+                // Usamos DB::connection('tenant_direct') para asegurar que borramos en la BD correcta
+                DB::connection('tenant_direct')->statement('SET FOREIGN_KEY_CHECKS=0;');
+                DB::connection('tenant_direct')->table('interest_rates')->truncate();
+                DB::connection('tenant_direct')->statement('SET FOREIGN_KEY_CHECKS=1;');
+
+                $this->command->info("  -> Tabla truncada exitosamente en {$dbName}.");
+
+                // 4. INSERCIÓN DIRECTA EN ESA MISMA CONEXIÓN
+                $now = now();
                 $rates = [
                     ['min' => 1, 'max' => 3, 'pct' => '5.00', 'desc' => 'Interés para 1-3 meses'],
                     ['min' => 4, 'max' => 6, 'pct' => '10.00', 'desc' => 'Interés para 4-6 meses'],
@@ -48,34 +82,27 @@ class SettingsSeeder extends Seeder
                 ];
 
                 foreach ($rates as $rate) {
-                    DB::table('interest_rates')->insert([
+                    DB::connection('tenant_direct')->table('interest_rates')->insert([
                         'tenant_id' => $tenant->id,
                         'cemetery_id' => $tenant->id,
                         'min_months' => $rate['min'],
                         'max_months' => $rate['max'],
                         'percentage' => $rate['pct'],
                         'description' => $rate['desc'],
-                        'is_active' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'is_active' => 1,
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                 }
 
-                $this->command->info("  -> Datos insertados correctamente.");
-
-                // 4. Cerrar contexto del tenant
-                tenancy()->end();
+                $this->command->info("  -> Datos insertados correctamente en {$dbName}.");
 
             } catch (\Exception $e) {
                 $this->command->error("Error crítico en tenant {$tenant->id}: " . $e->getMessage());
-                // Asegurar cierre incluso si hay error
-                if (tenancy()->isInitialized()) {
-                    tenancy()->end();
-                }
-                return; // Detener ejecución si hay error grave
+                // No detenemos el proceso para ver errores en otros tenants si hubiera más
             }
         }
 
-        $this->command->info("SettingsSeeder finalizado con éxito.");
+        $this->command->info("SettingsSeeder finalizado.");
     }
 }
