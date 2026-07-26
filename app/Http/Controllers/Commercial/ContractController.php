@@ -41,6 +41,10 @@ class ContractController extends Controller
         $contracts = $this->contractService->getContracts($filters);
         $metrics = $this->contractService->getContractMetrics();
         
+        $expiringSoon = $metrics['expiring_soon'] ?? 0;
+        $inGracePeriod = $metrics['in_grace_period'] ?? 0;
+        $decaying = $metrics['decaying'] ?? 0;
+        
         $contractTypes = ContractType::all();
         $customers = $this->contractService->getActiveCustomers();
         $availableCrypts = $this->contractService->getAvailableCrypts();
@@ -50,7 +54,10 @@ class ContractController extends Controller
             'contractTypes',
             'customers',
             'availableCrypts',
-            'metrics'
+            'metrics',
+            'expiringSoon',
+            'inGracePeriod',
+            'decaying'
         ));
     }
 
