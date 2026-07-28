@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->enum('type', ['persona_fisica', 'persona_moral']);
             $table->string('rfc_encrypted', 500);
             $table->string('rfc_hash', 64);

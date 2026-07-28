@@ -9,11 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('tenant_id')
+            $table->uuid('tenant_id')
                   ->nullable()  // NULL para SuperAdmin
-                  ->after('id')
-                  ->constrained()
-                  ->nullOnDelete();
+                  ->after('id');
+            
+            $table->foreign('tenant_id')->references('id')->on('tenants')->nullOnDelete();
             
             $table->index('tenant_id');
         });

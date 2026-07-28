@@ -62,12 +62,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cripta *</label>
-                        <select name="crypt_id" required
+                        <select name="crypt_id" id="crypt_id_edit" required
                                 class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 @error('crypt_id') border-red-500 @enderror">
                             <option value="">Seleccionar cripta...</option>
                             @foreach($availableCrypts as $crypt)
-                                <option value="{{ $crypt->id }}" {{ old('crypt_id', $contract->crypt_id) == $crypt->id ? 'selected' : '' }}>
-                                    {{ $crypt->full_code }} - {{ $crypt->cryptType->name ?? 'N/A' }}
+                                <option value="{{ $crypt->id }}" {{ old('crypt_id', $contract->crypt_id) == $crypt->id ? 'selected' : '' }}
+                                        data-price="{{ $crypt->price ?? 0 }}">
+                                    {{ $crypt->full_code }} - {{ $crypt->cryptType->name ?? 'N/A' }} (Capacidad: {{ $crypt->capacity }}) - Precio: ${{ number_format($crypt->price ?? 0, 2) }}
                                 </option>
                             @endforeach
                         </select>
@@ -112,9 +113,18 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Número de Parcialidades</label>
-                        <input type="number" name="installments_count" value="{{ old('installments_count', $contract->installments_count) }}" min="1"
+                        <input type="number" name="installments_count" id="installments_count" value="{{ old('installments_count', $contract->installments_count) }}" min="1"
                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                         @error('installments_count')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div id="down_payment_field" style="{{ old('payment_type', $contract->payment_type) === 'mixed' ? '' : 'display: none;' }}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Enganche / Anticipo *</label>
+                        <input type="number" step="0.01" name="down_payment" id="down_payment" value="{{ old('down_payment', $contract->down_payment) }}" min="0"
+                               class="w-full border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                        <p class="text-xs text-gray-500 mt-1">Monto inicial que paga el cliente</p>
+                        @error('down_payment')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
@@ -170,4 +180,96 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // === Actualizar precio al seleccionar cripta (EDIT) ===
+    const cryptSelectEdit = document.getElementById('crypt_id_edit');
+    const priceInputEdit = document.querySelector('input[name="price"]');
+    
+    if (cryptSelectEdit && priceInputEdit) {
+        function updatePriceEdit() {
+            const selectedOption = cryptSelectEdit.options[cryptSelectEdit.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            console.log('Precio seleccionado (edit):', price);
+            if (price && !isNaN(price) && parseFloat(price) > 0) {
+                priceInputEdit.value = parseFloat(price).toFixed(2);
+                priceInputEdit.dispatchEvent(new Event('input', { bubbles: true }));
+                priceInputEdit.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        
+        cryptSelectEdit.addEventListener('change', updatePriceEdit);
+        cryptSelectEdit.addEventListener('input', updatePriceEdit);
+        
+        if (cryptSelectEdit.value) {
+            updatePriceEdit();
+        }
+    }
+
+    // === Manejo del campo de enganche para pago mixto ===
+    const paymentTypeSelect = document.querySelector('select[name="payment_type"]');
+    const downPaymentField = document.getElementById('down_payment_field');
+    const downPaymentInput = document.getElementById('down_payment');
+    
+    if (paymentTypeSelect && downPaymentField) {
+        paymentTypeSelect.addEventListener('change', function() {
+            if (this.value === 'mixed') {
+                downPaymentField.style.display = 'block';
+                downPaymentInput.required = true;
+            } else {
+                downPaymentField.style.display = 'none';
+                downPaymentInput.required = false;
+            }
+        });
+        
+        // Initial check
+        if (paymentTypeSelect.value === 'mixed') {
+            downPaymentField.style.display = 'block';
+            downPaymentInput.required = true;
+        }
+    }
+
+    // === Calcular fecha de vencimiento basada en mensualidades ===
+    const installmentsInput = document.getElementById('installments_count');
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const endDateInput = document.querySelector('input[name="end_date"]');
+    
+    if (installmentsInput && startDateInput && endDateInput) {
+        installmentsInput.addEventListener('input', function() {
+            const months = parseInt(this.value);
+            if (months > 0 && startDateInput.value) {
+                const startDate = new Date(startDateInput.value + 'T00:00:00');
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + months);
+                
+                // Formatear fecha como YYYY-MM-DD
+                const year = endDate.getFullYear();
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const day = String(endDate.getDate()).padStart(2, '0');
+                
+                endDateInput.value = `${year}-${month}-${day}`;
+            }
+        });
+        
+        // También actualizar cuando cambia la fecha de inicio
+        startDateInput.addEventListener('change', function() {
+            const months = parseInt(installmentsInput.value);
+            if (months > 0 && this.value) {
+                const startDate = new Date(this.value + 'T00:00:00');
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + months);
+                
+                const year = endDate.getFullYear();
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const day = String(endDate.getDate()).padStart(2, '0');
+                
+                endDateInput.value = `${year}-${month}-${day}`;
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

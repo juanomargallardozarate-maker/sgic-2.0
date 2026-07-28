@@ -34,7 +34,8 @@ return new class extends Migration
         // Tabla de historial de suscripciones
         Schema::create('subscription_history', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('subscription_plan_id')->constrained()->onDelete('restrict');
             $table->enum('action', ['created', 'upgraded', 'downgraded', 'renewed', 'cancelled', 'expired']);
             $table->decimal('amount', 10, 2)->nullable();

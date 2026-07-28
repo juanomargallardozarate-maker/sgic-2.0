@@ -98,7 +98,7 @@
 
                 <!-- Contenido Principal -->
                 <div>
-                    {{ $slot }}
+                    @yield('content')
                 </div>
             </main>
         </div>

@@ -62,6 +62,7 @@ Route::middleware(['auth', 'role:super_admin'])
 |--------------------------------------------------------------------------
 | NOTA: El middleware 'tenant' identifica el cementerio por subdominio.
 | El middleware 'role' ahora incluye 'super_admin' para permitir auditoría.
+| SINTAXIS CORRECTA: Usar pipes (|) para separar múltiples roles en Spatie v6+
 */
 Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|consulta'])
     ->group(function () {
@@ -121,6 +122,16 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
                 Route::post('customers/{customer}/beneficiaries', [\App\Http\Controllers\Commercial\CustomerController::class, 'addBeneficiary'])->name('customers.beneficiaries.add');
                 Route::delete('customers/{customer}/beneficiaries/{beneficiary}', [\App\Http\Controllers\Commercial\CustomerController::class, 'removeBeneficiary'])->name('customers.beneficiaries.remove');
 
+                // CRUD completo de reservas (US-3.3)
+                Route::resource('reservations', \App\Http\Controllers\Commercial\ReservationController::class);
+
+                // Acciones específicas de reservas
+                Route::post('reservations/{reservation}/extend', [\App\Http\Controllers\Commercial\ReservationController::class, 'extend'])->name('reservations.extend');
+                Route::post('reservations/{reservation}/cancel', [\App\Http\Controllers\Commercial\ReservationController::class, 'cancel'])->name('reservations.cancel');
+                Route::post('reservations/{reservation}/convert', [\App\Http\Controllers\Commercial\ReservationController::class, 'convertToContract'])->name('reservations.convert');
+                Route::post('reservations/{reservation}/mark-expired', [\App\Http\Controllers\Commercial\ReservationController::class, 'markAsExpired'])->name('reservations.mark-expired');
+                Route::get('reservations/export', [\App\Http\Controllers\Commercial\ReservationController::class, 'export'])->name('reservations.export');
+
                 // CRUD completo de contratos
                 Route::resource('contracts', \App\Http\Controllers\Commercial\ContractController::class);
 
@@ -139,15 +150,15 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
             Route::get('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'index'])->name('crypts.index');
             Route::get('crypts/create', [\App\Http\Controllers\Inventory\CryptController::class, 'create'])->name('crypts.create');
             Route::post('crypts', [\App\Http\Controllers\Inventory\CryptController::class, 'store'])->name('crypts.store');
-            
+
             // Mapa visual de criptas
             Route::get('crypts/map', [\App\Http\Controllers\Inventory\CryptController::class, 'map'])->name('crypts.map');
-            
+
             // Importación masiva de criptas
             Route::get('crypts/import', [\App\Http\Controllers\Inventory\CryptController::class, 'showImport'])->name('crypts.import');
             Route::post('crypts/import', [\App\Http\Controllers\Inventory\CryptController::class, 'import'])->name('crypts.import.store');
             Route::get('crypts/import-template', [\App\Http\Controllers\Inventory\CryptController::class, 'downloadTemplate'])->name('crypts.import-template');
-            
+
             Route::get('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'show'])->name('crypts.show');
             Route::get('crypts/{crypt}/edit', [\App\Http\Controllers\Inventory\CryptController::class, 'edit'])->name('crypts.edit');
             Route::get('crypts/{crypt}/api', [\App\Http\Controllers\Inventory\CryptController::class, 'apiShow'])->name('crypts.api-show');
@@ -155,3 +166,16 @@ Route::middleware(['auth', 'role:super_admin|admin_cemetery|admin|operativo|cons
             Route::delete('crypts/{crypt}', [\App\Http\Controllers\Inventory\CryptController::class, 'destroy'])->name('crypts.destroy');
         });
     });
+
+    // ==========================================
+    // RUTAS DE VERIFICACIÓN WHATSAPP (FUERA del grupo con role middleware)
+    // Estas rutas deben estar fuera para evitar conflictos de permisos
+    // ==========================================
+    Route::middleware(['auth'])
+        ->prefix('inventory/commercial')
+        ->name('inventory.commercial.')
+        ->group(function () {
+            // Verificación WhatsApp para clientes
+            Route::post('contracts/send-verification-code', [\App\Http\Controllers\Commercial\ContractController::class, 'sendVerificationCode'])->name('contracts.send-verification-code');
+            Route::post('contracts/verify-code', [\App\Http\Controllers\Commercial\ContractController::class, 'verifyCode'])->name('contracts.verify-code');
+        });

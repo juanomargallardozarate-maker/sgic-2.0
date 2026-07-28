@@ -18,21 +18,27 @@ class AuditLog extends Model
         'action',
         'model_type',
         'model_id',
+        'model_code',
         'old_values',
         'new_values',
+        'pivot_changes',
         'ip_address',
         'user_agent',
         'url',
         'description',
+        'reason',
         'tags',
         'created_at',
+        'updated_at',
     ];
 
     protected $casts = [
         'old_values' => 'array',
         'new_values' => 'array',
+        'pivot_changes' => 'array',
         'tags' => 'array',
         'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relaciones

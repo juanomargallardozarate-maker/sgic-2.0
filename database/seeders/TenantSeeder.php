@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -30,8 +31,11 @@ class TenantSeeder extends Seeder
         $this->command->info('✅ SuperAdmin creado: superadmin@sgic.mx / Password123!');
 
         // 3. Crear Tenant de Ejemplo (Cementerio San José)
-        // ✅ CORRECCIÓN: Usar json_encode() explícitamente para evitar "Array to string conversion"
-        $tenant = Tenant::create([
+        // ✅ CORRECCIÓN: Usar DB::table para evitar que stancl/tenancy agregue la columna 'data'
+        $tenantId = (string) \Illuminate\Support\Str::uuid();
+        
+        DB::table('tenants')->insert([
+            'id' => $tenantId,
             'name' => 'Cementerio San José',
             'rfc' => 'CSJ200101ABC',
             'subdomain' => 'sanjose',
@@ -44,20 +48,22 @@ class TenantSeeder extends Seeder
             'maintenance_grace_days' => 30,
             'is_active' => true,
             'subscription_ends_at' => now()->addYear(),
-            'settings' => json_encode([ // ✅ FORZAR CONVERSIÓN A JSON STRING
+            'settings' => json_encode([
                 'address' => 'Av. Principal #123, Col. Centro',
                 'phone' => '555-123-4567',
                 'email' => 'contacto@sanjose.com',
                 'legal_representative' => 'Juan Pérez García',
                 'legal_representative_rfc' => 'PEGJ800101ABC',
             ]),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        $this->command->info('✅ Tenant creado: ' . $tenant->name . ' (sanjose.sgic.mx)');
+        $this->command->info('✅ Tenant creado: Cementerio San José (sanjose.sgic.mx)');
 
         // 4. Crear Usuario Admin para el Tenant
         $admin = User::create([
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenantId,
             'name' => 'Administrador San José',
             'email' => 'admin@sanjose.sgic.mx',
             'password' => Hash::make('Password123!'),

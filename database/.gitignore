@@ -1,1 +1,6 @@
 *.sqlite*
+   # OpenWA y Node
+   node_modules/
+   .session/
+   *.session/
+   session.data.json

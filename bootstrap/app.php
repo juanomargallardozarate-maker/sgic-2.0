@@ -17,6 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
+        
+        // Excluir rutas de verificación WhatsApp de protección CSRF
+        $middleware->validateCsrfTokens(except: [
+            'inventory/commercial/contracts/send-verification-code',
+            'inventory/commercial/contracts/verify-code',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

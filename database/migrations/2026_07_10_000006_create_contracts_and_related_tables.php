@@ -23,7 +23,8 @@ return new class extends Migration
 	// Contratos (RN-02, RN-03, RN-05)
 	Schema::create('contracts', function (Blueprint $table) {
   	 $table->id();
-  	 $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+  	 $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
    	 $table->foreignId('customer_id')->constrained()->onDelete('restrict');
    	 $table->foreignId('crypt_id')->constrained()->onDelete('restrict');
    	 $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
@@ -62,7 +63,8 @@ return new class extends Migration
         // Beneficiarios autorizados
         Schema::create('beneficiaries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('contract_id')->constrained()->onDelete('cascade');
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->string('relationship', 50); // Esposo/a, hijo/a, etc.
@@ -74,7 +76,8 @@ return new class extends Migration
         // Herederos designados (RN-05)
         Schema::create('heirs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('contract_id')->constrained()->onDelete('cascade');
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->boolean('is_designated')->default(false);
@@ -86,7 +89,8 @@ return new class extends Migration
         // Reservas
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
+            $table->uuid('tenant_id');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->foreignId('crypt_id')->constrained()->onDelete('cascade');
             $table->foreignId('customer_id')->constrained()->onDelete('restrict');
             $table->decimal('deposit_amount', 10, 2)->default(0);
