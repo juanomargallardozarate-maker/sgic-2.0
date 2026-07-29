@@ -20,9 +20,7 @@ target/
 .gradle/
 .mypy_cache/
 .pytest_cache/
-coverage/
-htmlcov/
-*.egg-info/
+.julia/
 
 # Logs and temp files
 *.log
@@ -38,21 +36,17 @@ htmlcov/
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# System
+# System files
 .DS_Store
 Thumbs.db
-.git/
 
 # Coverage
-.coverage
-coverage.xml
+coverage/
 htmlcov/
-.pytest_cache/
+.coverage
 
-# Distribution / Archives
+# Compressed files
 *.zip
 *.gz
 *.tar

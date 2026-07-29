@@ -15,6 +15,9 @@ use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
 
+use App\Models\SubscriptionPlan;
+use App\Models\SubscriptionHistory;
+
 class Tenant extends BaseTenant implements TenantWithDatabase
 {
     use HasDatabase, HasDomains;
@@ -127,6 +130,23 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     public function crypts(): HasMany
     {
         return $this->hasMany(Crypt::class);
+    }
+
+    /**
+     * Relación con el plan de suscripción actual del tenant.
+     * La columna 'plan' almacena el código del plan (ej. 'basic', 'professional').
+     */
+    public function subscriptionPlan(): HasOne
+    {
+        return $this->hasOne(SubscriptionPlan::class, 'code', 'plan');
+    }
+
+    /**
+     * Relación con el historial de suscripciones del tenant.
+     */
+    public function subscriptionHistory(): HasMany
+    {
+        return $this->hasMany(SubscriptionHistory::class);
     }
 
     /**
