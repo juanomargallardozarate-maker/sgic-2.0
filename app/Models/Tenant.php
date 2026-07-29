@@ -114,6 +114,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     }
 
     /**
+     * Relación con los usuarios del tenant.
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    /**
      * Scope para obtener solo los tenants activos.
      */
     public function scopeActive(Builder $query): Builder
