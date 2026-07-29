@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\Cemetery;
 use App\Models\User;
+use App\Models\Crypt;
 use App\Models\SubscriptionPlan;
 use App\Models\SubscriptionHistory;
 use App\Services\RfcValidator;
@@ -66,7 +67,7 @@ class TenantController extends Controller
             ->sum(fn($t) => $planPrices[$t->plan] ?? 0);
         
         // Total criptas gestionadas
-        $totalCrypts = \App\Models\Crypt::count();
+        $totalCrypts = Crypt::count();
         
         // Transformar tenants para Alpine.js
         $tenantsData = $tenants->map(function ($tenant) use ($planPrices) {
@@ -256,7 +257,7 @@ class TenantController extends Controller
     
     public function show(Tenant $tenant)
     {
-        $tenant->load(['cemetery', 'subscriptionPlan', 'subscriptionHistory.plan']);
+        $tenant->load(['cemetery', 'subscriptionPlan', 'subscriptionHistory.plan', 'users.roles']);
         
         $stats = [
             'total_crypts' => $tenant->crypts()->count(),
@@ -268,7 +269,7 @@ class TenantController extends Controller
     
     public function edit(Tenant $tenant)
     {
-        $tenant->load('cemetery');
+        $tenant->load(['cemetery', 'subscriptionPlan']);
         $plans = SubscriptionPlan::active()->ordered()->get();
         return view('super-admin.tenants.edit', compact('tenant', 'plans'));
     }

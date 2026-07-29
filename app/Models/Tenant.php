@@ -17,6 +17,10 @@ use Stancl\Tenancy\Database\Concerns\HasDomains;
 
 use App\Models\SubscriptionPlan;
 use App\Models\SubscriptionHistory;
+use App\Models\User;
+use App\Models\Crypt;
+use App\Models\Cemetery;
+use App\Models\Domain;
 
 class Tenant extends BaseTenant implements TenantWithDatabase
 {
