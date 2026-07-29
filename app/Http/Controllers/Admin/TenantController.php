@@ -142,6 +142,9 @@ class TenantController extends Controller
     
     public function store(Request $request)
     {
+        // Debug forense: Registrar intento de creación
+        \Log::info('INTENTO DE STORE TENANT', ['input_all' => $request->all()]);
+
         // ✅ CORRECCIÓN: Validación RFC flexible (12 o 13 caracteres)
         $validated = $request->validate([
             'name' => 'required|string|max:150',
@@ -167,7 +170,13 @@ class TenantController extends Controller
             'admin_name' => 'required|string|max:150',
             'admin_email' => 'required|email|unique:users,email',
             'admin_password' => 'required|string|min:8',
+        ], [
+            'plan.exists' => 'El plan seleccionado no existe en la base de datos.',
+            'subscription_months.required' => 'Los meses de suscripción son obligatorios.',
         ]);
+
+        // Debug forense: Validación exitosa
+        \Log::info('VALIDACIÓN EXITOSA');
 
         $isDevelopment = app()->environment('local', 'development');
 
@@ -189,6 +198,13 @@ class TenantController extends Controller
             // ✅ CORRECCIÓN: Cast explícito a int para Carbon
             $subscriptionMonths = (int) $validated['subscription_months'];
             
+            \Log::info('CREANDO TENANT', ['data' => [
+                'name' => $validated['name'],
+                'rfc' => $validated['rfc'],
+                'subdomain' => $validated['subdomain'],
+                'plan' => $validated['plan'],
+            ]]);
+            
             $tenant = Tenant::create([
                 'name' => $validated['name'],
                 'rfc' => $validated['rfc'],
@@ -204,6 +220,14 @@ class TenantController extends Controller
                 'subscription_ends_at' => now()->addMonths($subscriptionMonths),
             ]);
             
+            // Verificación explícita de que Tenant::create() no retornó null
+            if (!$tenant) {
+                throw new \Exception("Fallo crítico: Tenant::create() retornó null.");
+            }
+            
+            \Log::info('TENANT CREADO', ['tenant_id' => $tenant->id, 'name' => $tenant->name]);
+            
+            \Log::info('CREANDO CEMENTERIO', ['tenant_id' => $tenant->id]);
             Cemetery::create([
                 'tenant_id' => $tenant->id,
                 'name' => $validated['cemetery_name'],
@@ -218,7 +242,9 @@ class TenantController extends Controller
                 'opening_time' => '08:00:00',
                 'closing_time' => '18:00:00',
             ]);
+            \Log::info('CEMENTERIO CREADO', ['tenant_id' => $tenant->id]);
             
+            \Log::info('CREANDO USUARIO ADMIN', ['email' => $validated['admin_email']]);
             $admin = User::create([
                 'tenant_id' => $tenant->id,
                 'name' => $validated['admin_name'],
@@ -228,7 +254,9 @@ class TenantController extends Controller
                 'is_active' => true,
             ]);
             $admin->assignRole('admin_cemetery');
+            \Log::info('USUARIO ADMIN CREADO', ['user_id' => $admin->id, 'email' => $admin->email]);
             
+            \Log::info('CREANDO SUBSCRIPTION HISTORY', ['tenant_id' => $tenant->id, 'plan' => $validated['plan']]);
             $plan = SubscriptionPlan::where('code', $validated['plan'])->first();
             SubscriptionHistory::create([
                 'tenant_id' => $tenant->id,
@@ -240,8 +268,11 @@ class TenantController extends Controller
                 'notes' => 'Suscripción inicial al crear tenant',
                 'changed_by_user_id' => auth()->id(),
             ]);
+            \Log::info('SUBSCRIPTION HISTORY CREADO', ['tenant_id' => $tenant->id]);
             
             DB::commit();
+            
+            \Log::info('TENANT CREADO EXITOSAMENTE', ['tenant_id' => $tenant->id]);
             
             return redirect()
                 ->route('super-admin.tenants.show', $tenant)
@@ -249,9 +280,13 @@ class TenantController extends Controller
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->withInput()
-                ->with('error', 'Error al crear tenant: ' . $e->getMessage());
+            \Log::error('ERROR AL CREAR TENANT', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return redirect()->back()->withErrors(['general' => 'Error: ' . $e->getMessage()])->withInput();
         }
     }
     
