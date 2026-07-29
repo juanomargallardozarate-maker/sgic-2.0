@@ -35,22 +35,15 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
     /**
      * Los atributos que son asignables masivamente.
+     * NOTA: subscription_months es un campo virtual (solo se usa en formularios para calcular subscription_ends_at)
+     * y NO debe estar en este array $fillable.
      */
     protected $fillable = [
         'id',
         'name',
-        'rfc',
-        'subdomain',
-        'plan',
-        'grace_period_years',
-        'debt_months_to_block',
-        'moratorium_interest_rate',
-        'reservation_days',
-        'reservation_deposit_percent',
-        'maintenance_grace_days',
-        'settings',
-        'is_active',
-        'subscription_ends_at',
+        'slug',
+        'subscription_plan_id',
+        'status',
     ];
 
     /**
@@ -62,18 +55,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         return [
             'id',
             'name',
-            'rfc',
-            'subdomain',
-            'plan',
-            'grace_period_years',
-            'debt_months_to_block',
-            'moratorium_interest_rate',
-            'reservation_days',
-            'reservation_deposit_percent',
-            'maintenance_grace_days',
-            'settings',
-            'is_active',
-            'subscription_ends_at',
+            'slug',
+            'subscription_plan_id',
+            'status',
             'created_at',
             'updated_at',
             'deleted_at',

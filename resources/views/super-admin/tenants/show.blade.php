@@ -24,6 +24,16 @@
         </div>
     </x-slot>
 
+    {{-- Bloque de seguridad: Verificar si el tenant existe --}}
+    @if(!$tenant)
+        <div class="alert alert-danger">Error: No se pudo cargar la información del Tenant.</div>
+    @endif
+
+    {{-- Mostrar errores de sesión si existen --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">{{ implode(', ', $errors->all()) }}</div>
+    @endif
+
     {{-- Flash Messages --}}
     @if (session('success'))
         <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg">
@@ -54,16 +64,16 @@
             <div class="space-y-3">
                 <div class="flex justify-between py-2 border-b border-slate-100">
                     <span class="text-sm text-slate-500">RFC</span>
-                    <span class="text-sm font-medium text-slate-800 font-mono">{{ $tenant->rfc }}</span>
+                    <span class="text-sm font-medium text-slate-800 font-mono">{{ $tenant->rfc ?? 'N/A' }}</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-slate-100">
                     <span class="text-sm text-slate-500">Subdominio</span>
-                    <span class="text-sm font-medium text-indigo-600 font-mono">{{ $tenant->subdomain }}.sgic.mx</span>
+                    <span class="text-sm font-medium text-indigo-600 font-mono">{{ $tenant->subdomain ?? 'N/A' }}.sgic.mx</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-slate-100">
                     <span class="text-sm text-slate-500">Plan</span>
                     <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $tenant->plan === 'enterprise' ? 'bg-purple-100 text-purple-800' : ($tenant->plan === 'professional' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700') }}">
-                        {{ ucfirst($tenant->plan) }}
+                        {{ ucfirst($tenant->plan ?? 'basic') }}
                     </span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-slate-100">
@@ -77,7 +87,7 @@
                 </div>
                 <div class="flex justify-between py-2">
                     <span class="text-sm text-slate-500">Creado</span>
-                    <span class="text-sm font-medium text-slate-800">{{ $tenant->created_at->format('d/m/Y') }}</span>
+                    <span class="text-sm font-medium text-slate-800">{{ $tenant->created_at?->format('d/m/Y') ?? 'N/A' }}</span>
                 </div>
             </div>
         </div>
@@ -92,19 +102,19 @@
                 <div class="space-y-3">
                     <div class="flex justify-between py-2 border-b border-slate-100">
                         <span class="text-sm text-slate-500">Nombre</span>
-                        <span class="text-sm font-medium text-slate-800 text-right">{{ $tenant->cemetery->name }}</span>
+                        <span class="text-sm font-medium text-slate-800 text-right">{{ $tenant->cemetery?->name ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between py-2 border-b border-slate-100">
                         <span class="text-sm text-slate-500">Dirección</span>
-                        <span class="text-sm font-medium text-slate-800 text-right">{{ $tenant->cemetery->address }}</span>
+                        <span class="text-sm font-medium text-slate-800 text-right">{{ $tenant->cemetery?->address ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between py-2 border-b border-slate-100">
                         <span class="text-sm text-slate-500">Municipio/Estado</span>
-                        <span class="text-sm font-medium text-slate-800">{{ $tenant->cemetery->municipality }}, {{ $tenant->cemetery->state }}</span>
+                        <span class="text-sm font-medium text-slate-800">{{ $tenant->cemetery?->municipality ?? 'N/A' }}, {{ $tenant->cemetery?->state ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between py-2">
                         <span class="text-sm text-slate-500">Representante</span>
-                        <span class="text-sm font-medium text-slate-800">{{ $tenant->cemetery->legal_representative }}</span>
+                        <span class="text-sm font-medium text-slate-800">{{ $tenant->cemetery?->legal_representative ?? 'N/A' }}</span>
                     </div>
                 </div>
             @else
@@ -121,7 +131,7 @@
             <div class="space-y-4">
                 <div class="bg-slate-50 rounded-lg p-4">
                     <div class="text-xs text-slate-500 mb-1">Plan Actual</div>
-                    <div class="text-lg font-bold text-slate-800 capitalize">{{ $tenant->plan }}</div>
+                    <div class="text-lg font-bold text-slate-800 capitalize">{{ $tenant->subscriptionPlan?->name ?? 'Sin plan asignado' }}</div>
                 </div>
                 <div class="bg-slate-50 rounded-lg p-4">
                     <div class="text-xs text-slate-500 mb-1">Vence el</div>
