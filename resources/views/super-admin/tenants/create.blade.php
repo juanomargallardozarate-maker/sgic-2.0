@@ -544,34 +544,33 @@
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-3">Selecciona el Plan <span class="text-red-500">*</span></label>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                @foreach([
-                                    ['code' => 'basic', 'name' => 'Básico', 'price' => 1500, 'features' => ['Hasta 500 criptas', '3 usuarios', 'Soporte email']],
-                                    ['code' => 'professional', 'name' => 'Profesional', 'price' => 3500, 'features' => ['Hasta 2,000 criptas', '10 usuarios', 'PWA Campo + BI', 'Soporte prioritario'], 'popular' => true],
-                                    ['code' => 'enterprise', 'name' => 'Enterprise', 'price' => 8000, 'features' => ['Criptas ilimitadas', 'Usuarios ilimitados', 'API + Integraciones', 'Soporte 24/7']]
-                                ] as $plan)
+                                @foreach($plans as $plan)
                                     <label class="relative cursor-pointer">
-                                        <input type="radio" name="plan" value="{{ $plan['code'] }}" 
-                                               {{ old('plan', 'professional') == $plan['code'] ? 'checked' : '' }}
+                                        <input type="radio" name="plan" value="{{ $plan->code }}" 
+                                               {{ old('plan', 'professional') == $plan->code ? 'checked' : '' }}
                                                class="peer sr-only">
-                                        <div class="border-2 rounded-xl p-5 transition-all peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:shadow-md hover:border-slate-300 {{ isset($plan['popular']) ? 'border-indigo-300' : 'border-slate-200' }} h-full relative">
-                                            @if(isset($plan['popular']))
+                                        <div class="border-2 rounded-xl p-5 transition-all peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:shadow-md hover:border-slate-300 {{ $plan->order === 2 ? 'border-indigo-300' : 'border-slate-200' }} h-full relative">
+                                            @if($plan->order === 2)
                                                 <div class="absolute -top-3 right-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
                                                     MÁS POPULAR
                                                 </div>
                                             @endif
                                             <div class="flex justify-between items-start mb-3">
-                                                <span class="text-xs font-bold uppercase tracking-wider {{ $plan['code'] === 'enterprise' ? 'text-purple-600' : ($plan['code'] === 'professional' ? 'text-indigo-600' : 'text-slate-500') }}">
-                                                    {{ $plan['name'] }}
+                                                <span class="text-xs font-bold uppercase tracking-wider {{ $plan->code === 'enterprise' ? 'text-purple-600' : ($plan->code === 'professional' ? 'text-indigo-600' : 'text-slate-500') }}">
+                                                    {{ $plan->name }}
                                                 </span>
                                                 <div class="h-5 w-5 rounded-full border-2 border-slate-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-500 flex items-center justify-center">
                                                     <i class="fa-solid fa-check text-white text-[10px] opacity-0 peer-checked:opacity-100"></i>
                                                 </div>
                                             </div>
-                                            <div class="text-3xl font-bold text-slate-800">${{ number_format($plan['price']) }}<span class="text-sm text-slate-500 font-normal">/mes</span></div>
+                                            <div class="text-3xl font-bold text-slate-800">${{ number_format($plan->monthly_price) }}<span class="text-sm text-slate-500 font-normal">/mes</span></div>
                                             <ul class="mt-4 space-y-2 text-xs text-slate-600">
-                                                @foreach($plan['features'] as $feature)
-                                                    <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> {{ $feature }}</li>
-                                                @endforeach
+                                                <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> Hasta {{ number_format($plan->max_crypts) }} criptas</li>
+                                                <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> {{ $plan->max_users }} usuarios</li>
+                                                @if($plan->has_pwa)<li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> PWA Campo</li>@endif
+                                                @if($plan->has_bi_reports)<li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> Reportes BI</li>@endif
+                                                @if($plan->has_priority_support)<li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> Soporte prioritario</li>@endif
+                                                @if($plan->has_api_access)<li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mr-2 mt-0.5"></i> API Access</li>@endif
                                             </ul>
                                         </div>
                                     </label>

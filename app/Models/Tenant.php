@@ -133,7 +133,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
      */
     public function crypts(): HasMany
     {
-        return $this->hasMany(Crypt::class);
+        return $this->hasMany(Crypt::class, 'tenant_id');
     }
 
     /**
