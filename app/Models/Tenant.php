@@ -122,6 +122,14 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     }
 
     /**
+     * Relación con las criptas del tenant.
+     */
+    public function crypts(): HasMany
+    {
+        return $this->hasMany(Crypt::class);
+    }
+
+    /**
      * Scope para obtener solo los tenants activos.
      */
     public function scopeActive(Builder $query): Builder

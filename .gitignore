@@ -21,6 +21,8 @@ target/
 .mypy_cache/
 .pytest_cache/
 coverage/
+htmlcov/
+*.egg-info/
 
 # Logs and temp files
 *.log
@@ -39,11 +41,18 @@ coverage/
 *.swp
 *.swo
 
-# System files
+# System
 .DS_Store
 Thumbs.db
+.git/
 
-# Compressed files
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Distribution / Archives
 *.zip
 *.gz
 *.tar
@@ -66,8 +75,3 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
-# Documentation and coverage
-docs/_build/
-htmlcov/
-.coverage
