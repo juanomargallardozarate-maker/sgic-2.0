@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use App\Models\Tenant;
+use App\Models\SubscriptionPlan;
+use App\Models\User;
+
 class SubscriptionHistory extends Model
 {
     // ✅ AGREGAR ESTA LÍNEA
