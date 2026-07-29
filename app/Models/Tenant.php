@@ -140,9 +140,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
      * Relación con el plan de suscripción actual del tenant.
      * La columna 'plan' almacena el código del plan (ej. 'basic', 'professional').
      */
-    public function subscriptionPlan(): HasOne
+    public function subscriptionPlan()
     {
-        return $this->hasOne(SubscriptionPlan::class, 'code', 'plan');
+        return $this->belongsTo(SubscriptionPlan::class, 'plan', 'code');
     }
 
     /**
