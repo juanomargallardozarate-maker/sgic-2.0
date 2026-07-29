@@ -140,7 +140,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
      * Relación con el plan de suscripción actual del tenant.
      * La columna 'plan' almacena el código del plan (ej. 'basic', 'professional').
      */
-    public function subscriptionPlan()
+    public function subscriptionPlan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class, 'plan', 'code');
     }
