@@ -12,8 +12,42 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     use HasDatabase, HasDomains;
 
     /**
+     * Columnas reales de la tabla tenants (sin columna 'data').
+     */
+    protected $fillable = [
+        'id',
+        'name',
+        'rfc',
+        'subdomain',
+        'plan',
+        'grace_period_years',
+        'debt_months_to_block',
+        'moratorium_interest_rate',
+        'reservation_days',
+        'reservation_deposit_percent',
+        'maintenance_grace_days',
+        'is_active',
+        'subscription_ends_at',
+    ];
+
+    /**
+     * Casts para las columnas personalizadas.
+     */
+    protected $casts = [
+        'grace_period_years' => 'float',
+        'debt_months_to_block' => 'integer',
+        'moratorium_interest_rate' => 'float',
+        'reservation_days' => 'integer',
+        'reservation_deposit_percent' => 'float',
+        'maintenance_grace_days' => 'integer',
+        'is_active' => 'boolean',
+        'subscription_ends_at' => 'datetime',
+    ];
+
+    /**
      * Retornamos string vacío para deshabilitar la columna 'data'.
      * La firma debe coincidir EXACTAMENTE con el padre (string, no ?string).
+     * Esto evita que VirtualColumn intente acceder a una columna inexistente.
      */
     public static function getDataColumn(): string
     {
@@ -21,20 +55,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     }
 
     /**
-     * Opcional: Si necesitas casts específicos para tus columnas personalizadas.
-     * Solo definimos los casts, NO $fillable ni otras propiedades que causan conflicto.
+     * Relación con usuarios del tenant.
      */
-    protected function castAttribute($key, $value)
-    {
-        return match ($key) {
-            'subscription_ends_at' => $this->asDateTime($value),
-            'grace_period_years', 'moratorium_interest_rate', 'reservation_deposit_percent' => $this->fromFloat($value),
-            'debt_months_to_block', 'reservation_days', 'maintenance_grace_days' => $this->fromInt($value),
-            'is_active' => $this->asBoolean($value),
-            default => parent::castAttribute($key, $value),
-        };
-    }
-
     public function users()
     {
         return $this->hasMany(\App\Models\User::class);
