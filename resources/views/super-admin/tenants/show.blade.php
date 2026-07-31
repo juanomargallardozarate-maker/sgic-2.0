@@ -177,7 +177,7 @@
                     </div>
                     @if($tenant?->subscriptionPlan?->monthly_price)
                         <div class="text-xs text-slate-500 mt-1">
-                            ${{ number_format($tenant->subscriptionPlan->monthly_price, 2) }}/mes
+                            ${{ number_format($tenant->subscriptionPlan?->monthly_price ?? 0, 2) }}/mes
                         </div>
                     @endif
                 </div>

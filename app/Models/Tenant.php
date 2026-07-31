@@ -107,6 +107,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'maintenance_grace_days' => 'integer',
         'settings' => 'array',
         'is_active' => 'boolean',
+        'subscription_ends_at' => 'datetime',
     ];
 
     /**
