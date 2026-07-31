@@ -6,30 +6,14 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tenant extends BaseTenant implements TenantWithDatabase
 {
     use HasDatabase, HasDomains;
 
     /**
-     * Las conversiones de atributos.
-     */
-    protected $casts = [
-        'grace_period_years' => 'integer',
-        'debt_months_to_block' => 'integer',
-        'moratorium_interest_rate' => 'float',
-        'reservation_days' => 'integer',
-        'reservation_deposit_percent' => 'float',
-        'maintenance_grace_days' => 'integer',
-        'is_active' => 'boolean',
-        'subscription_ends_at' => 'datetime',
-    ];
-
-    /**
-     * Retorna string vacío para deshabilitar la columna 'data' JSON.
-     * Debe coincidir exactamente con la firma del padre.
+     * Retornamos string vacío para deshabilitar la columna 'data'.
+     * La firma debe coincidir EXACTAMENTE con el padre (string, no ?string).
      */
     public static function getDataColumn(): string
     {
@@ -37,26 +21,22 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     }
 
     /**
-     * Relación con los usuarios del tenant.
+     * Opcional: Si necesitas casts específicos para tus columnas personalizadas.
+     * Solo definimos los casts, NO $fillable ni otras propiedades que causan conflicto.
      */
-    public function users(): HasMany
+    protected function castAttribute($key, $value)
+    {
+        return match ($key) {
+            'subscription_ends_at' => $this->asDateTime($value),
+            'grace_period_years', 'moratorium_interest_rate', 'reservation_deposit_percent' => $this->fromFloat($value),
+            'debt_months_to_block', 'reservation_days', 'maintenance_grace_days' => $this->fromInt($value),
+            'is_active' => $this->asBoolean($value),
+            default => parent::castAttribute($key, $value),
+        };
+    }
+
+    public function users()
     {
         return $this->hasMany(\App\Models\User::class);
-    }
-
-    /**
-     * Relación con el historial de suscripciones.
-     */
-    public function subscriptionHistory(): HasMany
-    {
-        return $this->hasMany(\App\Models\SubscriptionHistory::class);
-    }
-
-    /**
-     * Relación con el cementerio (configuración principal).
-     */
-    public function cemetery(): HasOne
-    {
-        return $this->hasOne(\App\Models\Cemetery::class);
     }
 }
