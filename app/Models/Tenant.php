@@ -56,6 +56,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
      * 
      * NOTA: Solo incluir campos que existen REALMENTE en la base de datos.
      * Campos virtuales como 'subscription_months' NO deben estar aquí.
+     * 
+     * ============================================================================
+     * ⚠️ IMPORTANTE: Este modelo usa Stancl Tenancy. Los campos personalizados
+     * deben declararse aquí para evitar que se guarden en la columna JSON 'data'.
+     * Asegúrate de que TODOS los campos que usas en create() estén en este array.
+     * ============================================================================
      */
     protected $fillable = [
         'id',
@@ -69,11 +75,23 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'reservation_days',
         'reservation_deposit_percent',
         'maintenance_grace_days',
+        // Campos adicionales usados en el sistema SGIC
+        'rfc',
+        'subdomain',
+        'plan',
+        'is_active',
+        'subscription_ends_at',
     ];
 
     /**
      * Indicar a Stancl Tenancy qué columnas son explícitas en la base de datos
      * para que NO se guarden en la columna JSON 'data'.
+     * 
+     * ============================================================================
+     * ⚠️ CRÍTICO: TODOS los campos que uses en Tenant::create() deben estar aquí.
+     * Si un campo falta en esta lista, Stancl intentará guardarlo en la columna
+     * JSON 'data', lo que causará errores si la columna no existe.
+     * ============================================================================
      */
     public static function getCustomColumns(): array
     {
@@ -89,6 +107,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'reservation_days',
             'reservation_deposit_percent',
             'maintenance_grace_days',
+            // Campos adicionales usados en el sistema SGIC
+            'rfc',
+            'subdomain',
+            'plan',
+            'is_active',
+            'subscription_ends_at',
             'created_at',
             'updated_at',
             'deleted_at',
