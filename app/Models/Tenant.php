@@ -14,25 +14,6 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     use HasDatabase, HasDomains;
 
     /**
-     * Los únicos atributos que se pueden asignar masivamente.
-     */
-    protected $fillable = [
-        'id',
-        'name',
-        'rfc',
-        'subdomain',
-        'plan',
-        'grace_period_years',
-        'debt_months_to_block',
-        'moratorium_interest_rate',
-        'reservation_days',
-        'reservation_deposit_percent',
-        'maintenance_grace_days',
-        'is_active',
-        'subscription_ends_at',
-    ];
-
-    /**
      * Las conversiones de atributos.
      */
     protected $casts = [
