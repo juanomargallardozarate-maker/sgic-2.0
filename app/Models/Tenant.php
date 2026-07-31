@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,6 +23,23 @@ use App\Models\Crypt;
 use App\Models\Cemetery;
 use App\Models\Domain;
 
+/**
+ * Tenant - Modelo principal para gestión de clientes en el sistema SaaS SGIC
+ * 
+ * Cada tenant representa un cliente independiente con su propia configuración,
+ * cementerio(s), usuarios y suscripción.
+ * 
+ * ============================================================================
+ * ⚠️ ADVERTENCIA CRÍTICA SOBRE CAMPOS VIRTUALES
+ * ============================================================================
+ * El campo 'subscription_months' es un campo VIRTUAL (dummy) que SOLO se usa
+ * en formularios para calcular la fecha de fin de suscripción (subscription_ends_at).
+ * 
+ * ESTE CAMPO NO DEBE ESTAR EN EL ARRAY $fillable BAJO NINGUNA CIRCUNSTANCIA.
+ * Si se agrega accidentalmente, causará errores de base de datos ya que no
+ * existe como columna real en la tabla 'tenants'.
+ * ============================================================================
+ */
 class Tenant extends BaseTenant implements TenantWithDatabase
 {
     use HasDatabase, HasDomains;
@@ -35,8 +53,9 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
     /**
      * Los atributos que son asignables masivamente.
-     * NOTA: subscription_months es un campo virtual (solo se usa en formularios para calcular subscription_ends_at)
-     * y NO debe estar en este array $fillable.
+     * 
+     * NOTA: Solo incluir campos que existen REALMENTE en la base de datos.
+     * Campos virtuales como 'subscription_months' NO deben estar aquí.
      */
     protected $fillable = [
         'id',
@@ -44,6 +63,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'slug',
         'subscription_plan_id',
         'status',
+        'grace_period_years',
+        'debt_months_to_block',
+        'moratorium_interest_rate',
+        'reservation_days',
+        'reservation_deposit_percent',
+        'maintenance_grace_days',
     ];
 
     /**
@@ -58,6 +83,12 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'slug',
             'subscription_plan_id',
             'status',
+            'grace_period_years',
+            'debt_months_to_block',
+            'moratorium_interest_rate',
+            'reservation_days',
+            'reservation_deposit_percent',
+            'maintenance_grace_days',
             'created_at',
             'updated_at',
             'deleted_at',
@@ -76,11 +107,10 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'maintenance_grace_days' => 'integer',
         'settings' => 'array',
         'is_active' => 'boolean',
-        'subscription_ends_at' => 'datetime',
     ];
 
     /**
-     * MÉTODO CRÍTICO AGREGADO: Requerido por stancl/tenancy para identificar la clave del tenant.
+     * MÉTODO CRÍTICO: Requerido por stancl/tenancy para identificar la clave del tenant.
      * Esto soluciona el error: Call to undefined method App\Models\Tenant::getTenantKey()
      */
     public function getTenantKey(): string
@@ -122,11 +152,11 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
     /**
      * Relación con el plan de suscripción actual del tenant.
-     * La columna 'plan' almacena el código del plan (ej. 'basic', 'professional').
+     * La columna 'subscription_plan_id' referencia al ID del plan.
      */
-    public function subscriptionPlan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function subscriptionPlan(): BelongsTo
     {
-        return $this->belongsTo(SubscriptionPlan::class, 'plan', 'code');
+        return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
     }
 
     /**
@@ -142,39 +172,94 @@ class Tenant extends BaseTenant implements TenantWithDatabase
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope para obtener tenants por estado específico.
+     */
+    public function scopeByStatus(Builder $query, string $status): Builder
+    {
+        return $query->where('status', $status);
     }
 
     /**
      * Verificar si el tenant tiene una suscripción activa.
+     * 
+     * @return bool
      */
     public function isSubscribed(): bool
     {
-        if (!$this->is_active) {
+        if ($this->status !== 'active') {
             return false;
         }
 
-        if ($this->subscription_ends_at === null) {
-            return true; // Sin fecha de fin significa activo indefinidamente o plan vitalicio
+        // Si no hay fecha de fin, considerar como activo indefinidamente
+        if (!$this->hasAttribute('subscription_ends_at') || $this->subscription_ends_at === null) {
+            return true;
         }
 
         return $this->subscription_ends_at->isFuture();
     }
 
     /**
-     * Obtener la tasa de interés moratorio formateada o como decimal.
-     * (Asumiendo que existía un accessor o método similar en tu lógica original)
+     * Obtener días restantes hasta el vencimiento de la suscripción.
+     * 
+     * @return int|null Retorna null si no hay fecha de vencimiento
      */
-    public function getMoratoriumInterestRateAttribute($value)
+    public function getDaysUntilExpiry(): ?int
     {
-        return $value;
+        if (!$this->subscription_ends_at) {
+            return null;
+        }
+
+        return now()->diffInDays($this->subscription_ends_at, false);
     }
-    
+
     /**
-     * Ejemplo de método helper para obtener días de gracia (si existía en tu lógica).
+     * Verificar si la suscripción está por vencer (próximos 30 días).
+     * 
+     * @return bool
      */
-    public function getGracePeriodDaysAttribute(): int
+    public function isExpiringSoon(): bool
     {
-        return $this->grace_period_years * 365;
+        $days = $this->getDaysUntilExpiry();
+        
+        if ($days === null) {
+            return false;
+        }
+
+        return $days <= 30 && $days > 0;
+    }
+
+    /**
+     * Obtener la tasa de interés moratorio formateada como porcentaje.
+     * 
+     * @return string
+     */
+    public function getMoratoriumInterestRatePercentAttribute(): string
+    {
+        return number_format($this->moratorium_interest_rate * 100, 2) . '%';
+    }
+
+    /**
+     * Acceso defensivo para obtener el nombre del plan.
+     * Evita errores si la relación no está cargada o es null.
+     * 
+     * @return string
+     */
+    public function getPlanNameAttribute(): string
+    {
+        return $this->subscriptionPlan?->name ?? 'Sin plan asignado';
+    }
+
+    /**
+     * Acceso defensivo para obtener el precio mensual del plan.
+     * 
+     * @return float
+     */
+    public function getMonthlyPriceAttribute(): float
+    {
+        return $this->subscriptionPlan?->monthly_price ?? 0.00;
     }
 }
