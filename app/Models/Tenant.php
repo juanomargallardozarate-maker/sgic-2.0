@@ -60,13 +60,13 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     /**
      * Obtener el nombre de la columna de datos personalizados.
      * Sobrescrito para evitar que Stancl use 'data' por defecto.
-     * Retornamos null para indicar que NO usamos columna JSON genérica.
+     * Retornamos string vacío para indicar que NO usamos columna JSON genérica.
      * 
-     * @return null
+     * @return string
      */
-    public static function getDataColumn(): ?string
+    public static function getDataColumn(): string
     {
-        return null;
+        return '';
     }
 
     /**
