@@ -82,12 +82,15 @@ class Tenant extends BaseTenant implements TenantWithDatabase
 
     /**
      * Indicar a Stancl Tenancy qué columnas son explícitas en la base de datos
-     * para que NO se guarden en la columna JSON 'data'.
+     * para que NO se guarden en ninguna columna JSON.
      * 
      * ============================================================================
      * ⚠️ CRÍTICO: TODOS los campos que uses en Tenant::create() deben estar aquí.
-     * Si un campo falta en esta lista, Stancl intentará guardarlo en la columna
-     * JSON 'data', lo que causará errores si la columna no existe.
+     * Si un campo falta en esta lista, Stancl intentará guardarlo en una columna
+     * JSON (por defecto 'data'), lo que causará errores si la columna no existe.
+     * 
+     * NOTA: La tabla 'tenants' usa 'settings' como columna JSON, NO 'data'.
+     * Por eso NO incluimos 'data' en esta lista.
      * ============================================================================
      */
     public static function getCustomColumns(): array
@@ -111,6 +114,18 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'updated_at',
             'deleted_at',
         ];
+    }
+
+    /**
+     * Obtener el nombre de la columna de datos personalizados.
+     * Sobrescrito para evitar que Stancl use 'data' por defecto.
+     * Retornamos null para indicar que NO usamos columna JSON genérica.
+     */
+    public function getDataColumn(): ?string
+    {
+        // Retornamos null porque todos nuestros campos están en getCustomColumns()
+        // y no queremos que Stancl intente usar una columna 'data' inexistente.
+        return null;
     }
 
     /**
